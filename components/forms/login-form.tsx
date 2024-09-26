@@ -9,7 +9,6 @@ import { loginUser } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { FormState } from "@/lib/types";
 import { useEffect } from "react";
-import { redirect } from "next/navigation";
 
 export function LoginForm() {
     const initialState: FormState = { message: null, errors: {} };
