@@ -21,7 +21,7 @@ export function LoginForm() {
     }, [formState.errors, formState.message]);
 
     return (
-        <form className="flex items-center justify-center h-screen bg-background" action={formAction}>
+        <form className="flex items-start justify-center h-screen bg-background" action={formAction}>
             <Card className="w-full max-w-md p-6 sm:p-8">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold">Нэвтрэх</CardTitle>
