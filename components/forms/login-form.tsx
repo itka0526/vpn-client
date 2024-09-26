@@ -8,7 +8,7 @@ import { useFormState } from "react-dom";
 import { loginUser } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { FormState } from "@/lib/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function LoginForm() {
     const initialState: FormState = { message: null, errors: {} };
@@ -19,6 +19,13 @@ export function LoginForm() {
             toast.error(formState.message);
         }
     }, [formState.errors, formState.message]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (loading) {
+            setTimeout(() => setLoading(false), 1000);
+        }
+    }, [loading]);
 
     return (
         <form className="flex items-start justify-center h-screen bg-background" action={formAction}>
@@ -48,7 +55,7 @@ export function LoginForm() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button type="submit" className="w-full" aria-disabled={isPending}>
+                    <Button type="submit" className="w-full" aria-disabled={isPending || loading} onClick={() => setLoading(true)}>
                         Нэвтрэх
                     </Button>
                 </CardFooter>
