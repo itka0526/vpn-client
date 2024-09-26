@@ -1,9 +1,11 @@
-export function Spinner() {
+export function Spinner({ width = 40, height = 40 }: { width?: number; height?: number }) {
     return (
         <div role="status">
             <svg
                 aria-hidden="true"
-                className="w-10 h-10 text-gray-200 animate-spin dark:text-gray-600 fill-[#2299DD]"
+                width={width}
+                height={height}
+                className="text-gray-200 animate-spin dark:text-gray-600 fill-[#2299DD]"
                 viewBox="0 0 100 101"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"

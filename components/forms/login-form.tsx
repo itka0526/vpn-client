@@ -3,29 +3,22 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useFormState } from "react-dom";
 import { loginUser } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { FormState } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { SubmitButton } from "../ui/submit-button";
 
 export function LoginForm() {
     const initialState: FormState = { message: null, errors: {} };
-    const [formState, formAction, isPending] = useFormState(loginUser, initialState);
+    const [formState, formAction] = useFormState(loginUser, initialState);
 
     useEffect(() => {
         if (formState.message) {
             toast.error(formState.message);
         }
     }, [formState.errors, formState.message]);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        if (loading) {
-            setTimeout(() => setLoading(false), 1000);
-        }
-    }, [loading]);
 
     return (
         <form className="flex items-start justify-center h-screen bg-background" action={formAction}>
@@ -55,9 +48,7 @@ export function LoginForm() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button type="submit" className="w-full" aria-disabled={isPending || loading} onClick={() => setLoading(true)}>
-                        Нэвтрэх
-                    </Button>
+                    <SubmitButton text="Нэвтрэх" />
                 </CardFooter>
             </Card>
         </form>

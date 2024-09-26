@@ -1,3 +1,4 @@
+import { config } from "@/lib/config";
 import prisma from "@/lib/db";
 import { getSession } from "@/lib/session-server";
 import { Key } from "@prisma/client";
@@ -17,6 +18,14 @@ export async function POST(): Promise<NextResponse<KeyRouteRespType>> {
     const session = await getSession();
     if (!session.userId) {
         return NextResponse.json({ message: "Та эхлээд нэвтэрнэ үү.", status: false });
+    }
+    // Check if limit exceeded
+    const currLimit = await prisma.user.findUnique({ where: { id: session.userId }, select: { _count: { select: { keys: true } } } });
+    if (!currLimit) {
+        return NextResponse.json({ message: "Өгөгдлийн санд алдаа гарлаа.", status: false });
+    }
+    if (currLimit?._count.keys >= config.deviceLimitPerAcc) {
+        return NextResponse.json({ message: "Лимит хэтэрсэн байна.", status: false });
     }
     const resp = await fetch("http://147.45.231.11/create_new_user", { method: "POST", body: JSON.stringify({ creds: process.env.CREDS + "\n" }) });
     const data = await resp.text();

@@ -7,7 +7,7 @@ import { KeyRouteRespType } from "../api/keys/route";
 import toast from "react-hot-toast";
 import { PlusIcon } from "lucide-react";
 
-export function GenerateKey({ setState }: { setState: Dispatch<SetStateAction<Key[]>> }) {
+export function GenerateKey({ setState, limitExceeded }: { setState: Dispatch<SetStateAction<Key[]>>; limitExceeded: boolean }) {
     const [loading, setLoading] = useState(false);
     const fetchKey = async () => {
         setLoading(true);
@@ -23,8 +23,8 @@ export function GenerateKey({ setState }: { setState: Dispatch<SetStateAction<Ke
     };
 
     return (
-        <Button onClick={fetchKey} disabled={loading}>
-            <PlusIcon />
+        <Button onClick={fetchKey} disabled={loading || limitExceeded}>
+            <PlusIcon className="mr-2 h-4 w-4" /> Түлхүүр үүсгэх
         </Button>
     );
 }

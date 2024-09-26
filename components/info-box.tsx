@@ -2,10 +2,13 @@
 
 import { InfoIcon, XIcon } from "lucide-react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export function InfoBox() {
     const [open, setOpen] = useState(false);
+    const path = usePathname();
+    if (path === "/") return <></>;
     return (
         <>
             {open && (
@@ -22,7 +25,7 @@ export function InfoBox() {
                     </div>
                 </div>
             )}
-            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r" role="alert" aria-live="polite">
+            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 max-md:mt-8 rounded-r" role="alert" aria-live="polite">
                 <div className="flex items-center">
                     <InfoIcon className="h-5 w-5 mr-2 flex-shrink-0" aria-hidden="true" />
                     <p>

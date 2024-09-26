@@ -1,21 +1,22 @@
 import { Button } from "@/components/ui/button";
+import { WireGuardIcon } from "@/components/ui/wireguard";
 import Link from "next/link";
 
 export default function Home() {
     return (
         <>
             <section className="w-full flex flex-col gap-4 items-center">
-                <h1 className="text-xl">Сайн уу!</h1>
+                <WireGuardIcon />
                 <p className="text-center max-w-[512px]">
-                    Та эндээс өндөр хурдны VPN авах боломжтой. Нэг төхөөрөмжид зориулж түлхүүр үүсгэхийн тулд{" "}
+                    Хэрэв танд ямар нэгэн асуудал тулгарвал{" "}
                     <Link href={"/instructions"}>
                         <strong>зааврыг</strong>
                     </Link>{" "}
-                    дагана уу. Хэрэв танд заавартай холбоотой асуудал гарвал{" "}
+                    шалгана уу. Санал гомдолоо энэ{" "}
                     <Link href={"mailto:itka0526@gmail.com"}>
                         <strong>itka0526@gmail.com</strong>
                     </Link>{" "}
-                    хаягаар холбогдоно уу.
+                    хаяг руу явуулна уу
                 </p>
             </section>
             <section className="flex flex-col gap-4 justify-center w-full">

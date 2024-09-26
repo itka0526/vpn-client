@@ -35,7 +35,7 @@ export function WgConfig({ config }: { config: string }) {
                     </div>
                 </div>
             )}
-            <CardContent>
+            <CardContent className="max-md:p-0">
                 <Textarea
                     readOnly
                     value={config}

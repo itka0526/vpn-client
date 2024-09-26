@@ -9,6 +9,7 @@ import { FormState } from "@/lib/types";
 import { useFormState } from "react-dom";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
+import { SubmitButton } from "../ui/submit-button";
 
 export function RegisterForm() {
     const initialState: FormState = { message: null, errors: {} };
@@ -57,9 +58,7 @@ export function RegisterForm() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button type="submit" className="w-full" aria-disabled={isPending}>
-                        Бүртгүүлэх
-                    </Button>
+                    <SubmitButton text="Бүртгүүлэх" />
                 </CardFooter>
             </Card>
         </form>
