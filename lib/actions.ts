@@ -88,5 +88,8 @@ export async function loginUser(prevState: FormState, formData: FormData): Promi
             message: "Сервер дээр алдаа гарлаа.",
         };
     }
-    redirect("/dashboard");
+    return {
+        errors: {},
+        message: "Амжилтай.",
+    };
 }

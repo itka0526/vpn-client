@@ -9,13 +9,16 @@ import { loginUser } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { FormState } from "@/lib/types";
 import { useEffect } from "react";
+import { redirect } from "next/navigation";
 
 export function LoginForm() {
     const initialState: FormState = { message: null, errors: {} };
     const [formState, formAction, isPending] = useFormState(loginUser, initialState);
 
     useEffect(() => {
-        if (formState.message) {
+        if (formState.message === "Амжилтай.") {
+            redirect("/dashboard");
+        } else if (formState.message) {
             toast.error(formState.message);
         }
     }, [formState.errors, formState.message]);
