@@ -80,7 +80,7 @@ export async function loginUser(prevState: FormState, formData: FormData): Promi
                 message: "Нууц үг буруу байна.",
             };
         }
-        createSession(user);
+        await createSession(user);
     } catch (error) {
         console.error(error);
         return {
@@ -88,8 +88,5 @@ export async function loginUser(prevState: FormState, formData: FormData): Promi
             message: "Сервер дээр алдаа гарлаа.",
         };
     }
-    return {
-        errors: {},
-        message: "Амжилтай.",
-    };
+    redirect("/dashboard");
 }

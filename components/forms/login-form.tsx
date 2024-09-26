@@ -16,9 +16,7 @@ export function LoginForm() {
     const [formState, formAction, isPending] = useFormState(loginUser, initialState);
 
     useEffect(() => {
-        if (formState.message === "Амжилтай.") {
-            redirect("/dashboard");
-        } else if (formState.message) {
+        if (formState.message) {
             toast.error(formState.message);
         }
     }, [formState.errors, formState.message]);
