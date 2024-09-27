@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import { InfoBox } from "@/components/info-box";
+import { ScrollTextIcon } from "lucide-react";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -38,11 +39,11 @@ export default function RootLayout({
                     <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
                         <a
                             className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-                            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+                            href="/instructions"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
+                            <ScrollTextIcon className="mr-2 h-4 w-4" />
                             Заавар
                         </a>
                     </footer>
