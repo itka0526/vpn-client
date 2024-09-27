@@ -6,7 +6,7 @@ import { XIcon } from "lucide-react";
 
 export function Videos() {
     const [state, setState] = useState(false);
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     return (
         <>
             {open && (
