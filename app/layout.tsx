@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Image from "next/image";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import { InfoBox } from "@/components/info-box";

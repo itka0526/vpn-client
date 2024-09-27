@@ -3,7 +3,6 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { registerUser } from "@/lib/actions";
 import { FormState } from "@/lib/types";
 import { useFormState } from "react-dom";
@@ -13,7 +12,7 @@ import { SubmitButton } from "../ui/submit-button";
 
 export function RegisterForm() {
     const initialState: FormState = { message: null, errors: {} };
-    const [formState, formAction, isPending] = useFormState(registerUser, initialState);
+    const [formState, formAction] = useFormState(registerUser, initialState);
 
     useEffect(() => {
         if (formState.message) {

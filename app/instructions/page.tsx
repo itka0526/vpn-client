@@ -81,12 +81,12 @@ export default function Page() {
             </article>
             <article className="text-justify w-full" id="article-4">
                 <h2 className="text-xl font-bold my-4">4. Холбох (Компьютер)</h2>
-                <p>Хэрэв та компьютер дээр байгаа бол "Хуулах" товч дээр дарж тохиргоог хуулаад WireGuard програмаа нээнэ үү.</p>
-                <p>Дараа нь "Add Empty Tunnel" гээд товчийн дарна уу.</p>
+                <p>Хэрэв та компьютер дээр байгаа бол {'"Хуулах"'} товч дээр дарж тохиргоог хуулаад WireGuard програмаа нээнэ үү.</p>
+                <p>Дараа нь {'"Add Empty Tunnel"'} гээд товчийн дарна уу.</p>
                 <Image src={"/instruction-2.png"} alt="Adding configuration to a computer." width={512} height={512} className="my-4" />
                 <p>
-                    Та орлуулагч тохиргоог нь устгаад өмнө нь хуулсан текстээ хамгийн том <i>"[Interface]..."</i> гэсэн хайрцаг руу тавина уу. "Name"
-                    гэсэн хайрцаганд юу ч тавиж болно, e.g., "minii_computer". Дараа нь "Save" товчийг дарна уу.
+                    Та орлуулагч тохиргоог нь устгаад өмнө нь хуулсан текстээ хамгийн том <i>{'"[Interface]..."'}</i> гэсэн хайрцаг руу тавина уу.
+                    {'"Name"'} гэсэн хайрцаганд юу ч тавиж болно, e.g., {'"minii_computer"'}. Дараа нь {'"Save"'} товчийг дарна уу.
                     <br />
                     <span className="text-blue-300 text-sm">({"ALT + A -> CTRL + P -> Save"})</span>
                 </p>
@@ -98,7 +98,7 @@ export default function Page() {
                     className="my-4"
                 />
                 <p>
-                    Ажиллуулахын тулд "minii_computer" дээр хоер удаа дарна уу <br />
+                    Ажиллуулахын тулд {'"minii_computer"'} дээр хоер удаа дарна уу <br />
                     <span className="text-blue-300 text-sm">(Ногоон гэрэл асах естой)</span>
                 </p>
             </article>
