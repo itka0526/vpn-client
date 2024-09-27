@@ -19,7 +19,7 @@ export default function Home() {
                     хаяг руу явуулна уу
                 </p>
             </section>
-            <section className="flex flex-col gap-4 justify-center w-full">
+            <section className="flex flex-col gap-4 justify-center md:max-w-[33%] w-full">
                 <Link href={"/register"} className="w-full flex justify-center">
                     <Button variant="outline" className="w-full">
                         Бүртгүүлэх
