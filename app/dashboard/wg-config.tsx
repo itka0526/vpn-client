@@ -30,7 +30,7 @@ export function WgConfig({ config }: { config: string }) {
                     <div className="absolute top-8 right-8">
                         <XIcon width={48} height={48} color="black" className="hover:rotate-90 transition-transform cursor-pointer" />
                     </div>
-                    <div className="rounded-md shadow-md p-4 bg-black pointer-events-none">
+                    <div className="rounded-md shadow-md p-6 bg-white pointer-events-none">
                         <QRCode value={config} size={280} />
                     </div>
                 </div>
@@ -40,7 +40,7 @@ export function WgConfig({ config }: { config: string }) {
                     readOnly
                     value={config}
                     className="font-mono text-sm h-64 mb-4 bg-gray-800 text-white border-gray-700 focus:ring-gray-700 focus:border-gray-700"
-                    placeholder="Nothing  ..."
+                    placeholder="Nothing..."
                 />
                 <div className="flex gap-4">
                     <Button onClick={() => setOpen(true)}>
