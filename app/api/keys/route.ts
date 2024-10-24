@@ -1,8 +1,9 @@
 import { config } from "@/lib/config";
 import prisma from "@/lib/db";
 import { getSession } from "@/lib/session-server";
-import { Key } from "@prisma/client";
-import { NextResponse } from "next/server";
+import { AllVPNTypes } from "@/lib/types";
+import { Key, VPNType } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
 
 export type KeyRouteRespType = { message: string } & (
     | {
@@ -14,25 +15,56 @@ export type KeyRouteRespType = { message: string } & (
       }
 );
 
-export async function POST(): Promise<NextResponse<KeyRouteRespType>> {
+export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespType>> {
     const session = await getSession();
     if (!session.userId) {
         return NextResponse.json({ message: "Та эхлээд нэвтэрнэ үү.", status: false });
     }
-    // Check if limit exceeded
-    const currLimit = await prisma.user.findUnique({ where: { id: session.userId }, select: { _count: { select: { keys: true } } } });
-    if (!currLimit) {
+    // Check if limit exceeded and if the user is banned
+    const dbRes = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { banned: true, activeTill: true, _count: { select: { keys: true } } },
+    });
+    if (!dbRes) {
         return NextResponse.json({ message: "Өгөгдлийн санд алдаа гарлаа.", status: false });
     }
-    if (currLimit?._count.keys >= config.deviceLimitPerAcc) {
+    const { _count, banned, activeTill } = dbRes;
+    if (activeTill < new Date()) {
+        return NextResponse.json({ message: "Та төлбөрөө төлнө үү.", status: false });
+    }
+    if (banned) {
+        return NextResponse.json({ message: "Таны хаяг блоклогдсон байна.", status: false });
+    }
+    if (_count.keys >= config.deviceLimitPerAcc) {
         return NextResponse.json({ message: "Лимит хэтэрсэн байна.", status: false });
     }
-    const resp = await fetch("http://147.45.231.11/create_new_user", { method: "POST", body: JSON.stringify({ creds: process.env.CREDS + "\n" }) });
+    const { searchParams } = new URL(req.url);
+    const validatedVPNType = AllVPNTypes.safeParse(searchParams.get("VPNType"));
+
+    if (!validatedVPNType.success) {
+        return NextResponse.json({ message: "Буруу 'Request Query' явуулсан байна.", status: false });
+    }
+    const vt: VPNType = validatedVPNType.data;
+    let resp: Response;
+
+    if (vt === "OpenVPN") {
+        resp = await fetch(`http://${process.env.OVIP}/create_new_user`, {
+            method: "POST",
+            body: JSON.stringify({ creds: process.env.OVPW }),
+        });
+    } else {
+        resp = await fetch(`http://${process.env.WGIP}/create_new_user`, {
+            method: "POST",
+            body: JSON.stringify({ creds: process.env.WGPW + "\n" }),
+        });
+    }
+
     const data = await resp.text();
     if (data.startsWith("Success!")) {
         const key = data.replace("Success! Output: ", "");
+        const [keyPath, keyConfig] = key.split("@#$");
         try {
-            const genKey = await prisma.key.create({ data: { secret: key, userId: session.userId } });
+            const genKey = await prisma.key.create({ data: { secret: keyConfig, userId: session.userId, keyPath: keyPath, type: vt } });
             return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
         } catch (error) {
             return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });

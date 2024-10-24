@@ -9,6 +9,9 @@ import { useFormState } from "react-dom";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
 import { SubmitButton } from "../ui/submit-button";
+import Link from "next/link";
+import { Button } from "../ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export function RegisterForm() {
     const initialState: FormState = { message: null, errors: {} };
@@ -56,8 +59,14 @@ export function RegisterForm() {
                         ))}
                     </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col space-y-4">
                     <SubmitButton text="Бүртгүүлэх" />
+                    <Button variant="link" asChild className="px-0 text-sm text-muted-foreground hover:text-primary">
+                        <Link href="/login" className="flex items-center">
+                            <ArrowLeft className="mr-1 h-4 w-4" />
+                            Бүртгэлтэй юу? Нэвтрэх
+                        </Link>
+                    </Button>
                 </CardFooter>
             </Card>
         </form>

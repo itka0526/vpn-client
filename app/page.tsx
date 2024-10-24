@@ -1,22 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { WireGuardIcon } from "@/components/ui/wireguard";
+import Logo from "@/public/logo.png";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
     return (
         <>
             <section className="w-full flex flex-col gap-4 items-center">
-                <WireGuardIcon />
-                <p className="text-center max-w-[512px]">
-                    Хэрэв танд ямар нэгэн асуудал тулгарвал{" "}
+                <div className="overflow-hidden rounded-md bg-white p-3">
+                    <Image src={Logo} alt="Лого" width={100} height={100} />
+                </div>
+                <p className="text-center max-w-[512px] my-4">
                     <Link href={"/instructions"}>
-                        <strong>зааврыг</strong>
-                    </Link>{" "}
-                    шалгана уу. Санал гомдолоо энэ{" "}
-                    <Link href={"mailto:itka0526@gmail.com"}>
-                        <strong>itka0526@gmail.com</strong>
-                    </Link>{" "}
-                    хаяг руу явуулна уу
+                        <h1 className="text-2xl text-red-500">
+                            <strong>Заавар үзэх</strong>
+                        </h1>
+                    </Link>
                 </p>
             </section>
             <section className="flex flex-col gap-4 justify-center md:max-w-[33%] w-full">

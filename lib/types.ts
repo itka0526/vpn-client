@@ -1,6 +1,6 @@
 import { typeToFlattenedError, z, ZodType } from "zod";
 
-import { User } from "@prisma/client";
+import { User, VPNType } from "@prisma/client";
 import { SessionOptions } from "iron-session";
 
 export const UserSchema = z.object({
@@ -9,9 +9,11 @@ export const UserSchema = z.object({
     password: z.string().min(6, { message: "Нууц үг хэтэрхий богино байна" }),
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
+    activeTill: z.coerce.date(),
+    banned: z.boolean(),
 }) satisfies ZodType<User>;
 
-export const RegisterUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true })
+export const RegisterUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true, activeTill: true, banned: true })
     .extend({
         confirmPassword: z.string().min(6, { message: "Нууц үг хэтэрхий богино байна" }),
     })
@@ -25,7 +27,9 @@ export const RegisterUserSchema = UserSchema.omit({ id: true, createdAt: true, u
         }
     });
 
-export const LoginUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true });
+export const LoginUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true, activeTill: true, banned: true });
+
+export const AllVPNTypes = z.enum(["WireGuardVPN", "OpenVPN"]) satisfies ZodType<VPNType>;
 
 export type FormState = {
     errors?: typeToFlattenedError<z.infer<typeof RegisterUserSchema> | z.infer<typeof LoginUserSchema>>["fieldErrors"];

@@ -4,17 +4,19 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  keys      Key[]
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  activeTill DateTime @default(dbgenerated("(now() + '14 days'::interval)")) @db.Date
+  banned     Boolean  @default(false)
+  keys       Key[]
 
   @@index([email])
 }
@@ -23,6 +25,13 @@ model Key {
   id        Int      @id @default(autoincrement())
   secret    String
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+  type      VPNType  @default(WireGuardVPN)
+  keyPath   String   @default("")
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum VPNType {
+  WireGuardVPN
+  OpenVPN
 }
