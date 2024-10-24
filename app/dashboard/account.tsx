@@ -15,17 +15,18 @@ export async function Account({ userId }: { userId: number }) {
         redirect("/login");
     }
     const { activeTill, banned, email } = user;
+    const inactive = new Date() > activeTill;
     return (
         <Card className="w-full bg-gray-800 border-gray-700">
             <CardContent className="px-6 py-4">
-                <nav className="flex justify-between items-center">
-                    <div className="flex items-center gap-6">
+                <nav className="flex flex-col gap-4 md:justify-between md:items-center md:flex-row md:gap-0">
+                    <div className="flex md:items-center gap-6">
                         <div className="text-sm text-gray-400">
                             <span className="block">Хэрэглэгч:</span>
                             <span
                                 className={cn(
                                     "font-semibold text-gray-100",
-                                    banned ? "text-red-500" : new Date() > activeTill ? "text-yellow-500" : "text-green-500"
+                                    banned ? "text-red-500" : inactive ? "text-yellow-500" : "text-green-500"
                                 )}
                             >
                                 {email}
@@ -33,18 +34,18 @@ export async function Account({ userId }: { userId: number }) {
                         </div>
                         <div className="text-sm text-gray-400">
                             <span className="block">Төлөв:</span>
-                            <span className={cn("font-medium text-gray-100")}>
-                                {banned ? "Блоклогдсон" : new Date() > activeTill ? "Идэвхгүй" : "Идэвхитэй"}
-                            </span>
+                            <span className={cn("font-medium text-gray-100")}>{banned ? "Блоклогдсон" : inactive ? "Идэвхгүй" : "Идэвхитэй"}</span>
                         </div>
                     </div>
                     <div className="flex items-center space-x-6">
-                        <div className="text-sm text-gray-400">
-                            <span className="block">Хүчинтэй хугацаа:</span>
+                        {/* <div className="hidden md:block text-sm text-gray-400">
+                            <span className="hidden md:block">Хүчинтэй хугацаа:</span>
                             <span className="font-medium text-gray-200">{activeTill.toLocaleString()}</span>
-                        </div>
+                        </div> */}
                         <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                            <Link href="/payment">Төлбөр төлөх</Link>
+                            <Link href="/payment" className={cn(inactive ? "text-red-500" : "")}>
+                                Төлбөр төлөх
+                            </Link>
                         </Button>
                     </div>
                 </nav>
