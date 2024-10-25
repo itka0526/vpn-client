@@ -55,11 +55,12 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
     } else {
         resp = await fetch(`http://${process.env.WGIP}/create_new_user`, {
             method: "POST",
-            body: JSON.stringify({ creds: process.env.WGPW + "\n" }),
+            body: JSON.stringify({ creds: process.env.WGPW }),
         });
     }
 
     const data = await resp.text();
+    console.log(data);
     if (data.startsWith("Success!")) {
         const key = data.replace("Success! Output: ", "");
         const [keyPath, keyConfig] = key.split("@#$");
