@@ -5,6 +5,7 @@ import { createSession } from "./auth";
 import prisma from "./db";
 import { FormState, LoginUserSchema, RegisterUserSchema } from "./types";
 import { redirect } from "next/navigation";
+import { getSession } from "./session-server";
 
 export async function registerUser(prevState: FormState, formData: FormData): Promise<FormState> {
     const rawFormData = Object.fromEntries(formData.entries());
@@ -89,4 +90,13 @@ export async function loginUser(prevState: FormState, formData: FormData): Promi
         };
     }
     redirect("/dashboard");
+}
+
+export async function logoutUser() {
+    try {
+        (await getSession()).destroy();
+        return { success: true };
+    } catch (error) {
+        return { success: false };
+    }
 }

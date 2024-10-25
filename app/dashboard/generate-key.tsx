@@ -32,7 +32,7 @@ export function GenerateKey({
 
     return (
         <Button onClick={fetchKey} disabled={loading || limitExceeded}>
-            <PlusIcon className="mr-2 h-4 w-4" /> <span className="hidden md:block">Түлхүүр үүсгэх</span>
+            <PlusIcon className="md:mr-2 h-4 w-4" /> <span className="hidden md:block">Түлхүүр үүсгэх</span>
         </Button>
     );
 }

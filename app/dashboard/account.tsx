@@ -1,12 +1,12 @@
 "use server";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import prisma from "@/lib/db";
 import { getSession } from "@/lib/session-server";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { MobileMenu } from "./mobile-menu";
+import { DesktopMenu } from "./desktop-menu";
 
 export async function Account({ userId }: { userId: number }) {
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, banned: true, activeTill: true } });
@@ -18,8 +18,8 @@ export async function Account({ userId }: { userId: number }) {
     const inactive = new Date() > activeTill;
     return (
         <Card className="w-full bg-gray-800 border-gray-700">
-            <CardContent className="px-6 py-4">
-                <nav className="flex flex-col gap-4 md:justify-between md:items-center md:flex-row md:gap-0">
+            <CardContent className="px-4 py-4">
+                <nav className="flex gap-4 justify-between items-center flex-row md:gap-0">
                     <div className="flex md:items-center gap-6">
                         <div className="text-sm text-gray-400">
                             <span className="block">Хэрэглэгч:</span>
@@ -37,17 +37,8 @@ export async function Account({ userId }: { userId: number }) {
                             <span className={cn("font-medium text-gray-100")}>{banned ? "Блоклогдсон" : inactive ? "Идэвхгүй" : "Идэвхитэй"}</span>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-6">
-                        {/* <div className="hidden md:block text-sm text-gray-400">
-                            <span className="hidden md:block">Хүчинтэй хугацаа:</span>
-                            <span className="font-medium text-gray-200">{activeTill.toLocaleString()}</span>
-                        </div> */}
-                        <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                            <Link href="/payment" className={cn(inactive ? "text-red-500" : "")}>
-                                Төлбөр төлөх
-                            </Link>
-                        </Button>
-                    </div>
+                    <MobileMenu activeTill={activeTill} inactive={inactive} />
+                    <DesktopMenu activeTill={activeTill} inactive={inactive} />
                 </nav>
             </CardContent>
         </Card>

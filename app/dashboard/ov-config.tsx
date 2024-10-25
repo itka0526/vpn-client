@@ -9,7 +9,7 @@ import { useCallback } from "react";
 export function OvConfig({ config, fileName, createdAt }: { config: string; fileName: string; createdAt: Date }) {
     const handleClick = useCallback(() => {
         const element = document.createElement("a");
-        const file = new Blob([config], { type: "text/plain" });
+        const file = new Blob([config], { type: "application/x-openvpn-profile" });
 
         element.setAttribute("href", URL.createObjectURL(file));
         element.setAttribute("download", fileName);

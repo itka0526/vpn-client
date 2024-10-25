@@ -6,6 +6,7 @@ import NextTopLoader from "nextjs-toploader";
 // import { InfoBox } from "@/components/info-box";
 import { Contact, ScrollTextIcon } from "lucide-react";
 import Link from "next/link";
+import Welcome from "@/components/welcome";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -31,9 +32,10 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+                <Welcome />
                 <Toaster position="bottom-right" />
                 <NextTopLoader showSpinner={false} color="#202020" shadow="0 0 10px #2299DD,0 0 5px #2299DD" />
-                <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+                <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-4 md:p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
                     {/* <InfoBox /> */}
                     <main className="flex flex-col gap-8 row-start-2 h-full w-full max-md:justify-center items-center">{children}</main>
                     <footer className="row-start-3 flex gap-8 flex-wrap items-center justify-center">

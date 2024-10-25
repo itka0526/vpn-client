@@ -7,18 +7,26 @@ export default function Page() {
         <CustomSection>
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold text-center mb-10">Заавар</h1>
-                <p className="my-4">Хэрэв та төлбөрөө хугацаанд нь төлөөгүй бол түлхүүрүүд хүчингүй болж, устгагдах болно.</p>
+                <p className="my-4">
+                    Хэрэв та төлбөрөө хугацаанд нь төлөөгүй бол түлхүүрүүд хүчингүй болж, устгагдах болно. Нэг төхөөрөмжинд нэг л түлхүүр байх естой.
+                </p>
                 <div className="grid gap-8">
                     <Card className="bg-gray-800 border-gray-700">
                         <CardHeader>
                             <CardTitle>
-                                <Link href="/instructions/openvpn" className="text-blue-400 hover:text-blue-300 transition-colors">
-                                    OpenVPN ашиглах
-                                </Link>
+                                <h1 className="text-blue-400 hover:text-blue-300 transition-colors">OpenVPN ашиглах</h1>
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-2">
                             <p className="text-gray-300">OpenVPN нь VPN тохиргоог линкээр амархан суулгана.</p>
+                            <ul className="text-blue-400 hover:text-blue-300 transition-colors">
+                                <li>
+                                    <Link href={"/instructions/iphone-openvpn"}>iPhone</Link>
+                                </li>
+                                <li>
+                                    <Link href={"/instructions/macOS-openvpn"}>macOS</Link>
+                                </li>
+                            </ul>
                         </CardContent>
                     </Card>
 

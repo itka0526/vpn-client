@@ -59,12 +59,6 @@ export async function GET() {
     }
 
     if (ovKeys.length >= 1) {
-        console.log(
-            JSON.stringify({
-                creds: process.env.OVPW + "\n",
-                clientNames: ovKeys.map((k) => k.keyPath),
-            })
-        );
         const resp = await fetch(`http://${etov}/delete_user`, {
             method: "POST",
             body: JSON.stringify({
