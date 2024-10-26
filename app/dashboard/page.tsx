@@ -8,20 +8,27 @@ import { DashboardItemsWrapper } from "./items-wrapper";
 import { Account } from "./account";
 import AccountSkeleton from "./account-skeleton";
 import prisma from "@/lib/db";
+import { PartialUser } from "@/lib/types";
 
 export default async function Dashboard() {
     const user = await getSession();
+    let dbUser: PartialUser | null = null;
     if (!user.userId) {
         redirect("/login");
-    } else if (user.userId && (await prisma.user.findUnique({ where: { id: 1000 } }))) {
+    }
+    if (user.userId) {
+        dbUser = await prisma.user.findUnique({ where: { id: user.userId }, select: { email: true, banned: true, activeTill: true } });
         // If the user does not exist destroy session
-        (await getSession()).destroy();
-        redirect("/login");
-    } else {
+        if (!dbUser) {
+            (await getSession()).destroy();
+            redirect("/login");
+        }
+    }
+    if (user.userId && dbUser) {
         return (
             <>
                 <Suspense fallback={<AccountSkeleton />}>
-                    <Account userId={user.userId} />
+                    <Account user={dbUser} />
                 </Suspense>
                 <Suspense
                     fallback={

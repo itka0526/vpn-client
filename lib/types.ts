@@ -3,6 +3,8 @@ import { typeToFlattenedError, z, ZodType } from "zod";
 import { User, VPNType } from "@prisma/client";
 import { SessionOptions } from "iron-session";
 
+export type PartialUser = Pick<User, "email" | "banned" | "activeTill">;
+
 export const UserSchema = z.object({
     id: z.number(),
     email: z.string().email({ message: "Буруу и-мэйл" }),

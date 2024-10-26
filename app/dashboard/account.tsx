@@ -1,19 +1,12 @@
 "use server";
 
 import { Card, CardContent } from "@/components/ui/card";
-import prisma from "@/lib/db";
-import { getSession } from "@/lib/session-server";
 import { cn } from "@/lib/utils";
-import { redirect } from "next/navigation";
 import { MobileMenu } from "./mobile-menu";
 import { DesktopMenu } from "./desktop-menu";
+import { PartialUser } from "@/lib/types";
 
-export async function Account({ userId }: { userId: number }) {
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, banned: true, activeTill: true } });
-    if (!user) {
-        (await getSession()).destroy();
-        redirect("/login");
-    }
+export async function Account({ user }: { user: PartialUser }) {
     const { activeTill, banned, email } = user;
     const inactive = new Date() > activeTill;
     return (
