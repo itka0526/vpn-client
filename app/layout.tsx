@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -22,7 +22,13 @@ const geistMono = localFont({
 export const metadata: Metadata = {
     title: "🔥Гал VPN🔥 - @itka0526",
     description: "Интернэтийн хязгаарлалтыг давхад зориулав.",
-    viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0",
+};
+
+export const viewport: Viewport = {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
 };
 
 export default function RootLayout({
@@ -31,7 +37,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="mn">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <Welcome />
                 <Toaster position="bottom-right" />

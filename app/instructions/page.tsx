@@ -39,6 +39,9 @@ export default function Page() {
                             <p className="text-gray-300">OpenVPN нь VPN тохиргоог файлаар амархан суулгана.</p>
                             <ul className="text-blue-400 hover:text-blue-300 transition-colors">
                                 <li>
+                                    <Link href={"/instructions/android-openvpn"}>Android</Link>
+                                </li>
+                                <li>
                                     <Link href={"/instructions/iphone-openvpn"}>iPhone</Link>
                                 </li>
                                 <li>

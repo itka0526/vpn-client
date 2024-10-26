@@ -1,6 +1,6 @@
-import { CardContent } from "@/components/ui/card";
+"use client";
+
 import { useCopy } from "./copy";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export function OlConfig({ config, createdAt }: { config: string; createdAt: Date }) {
     const { copied, copyToClipboard } = useCopy();
-    const formattedDate = createdAt?.toLocaleDateString("mn-MN", {
+    const formattedDate = createdAt.toLocaleDateString("mn-MN", {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -35,7 +35,7 @@ export function OlConfig({ config, createdAt }: { config: string; createdAt: Dat
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-            <span className="text-sm text-gray-400 flex-shrink-0 mx-2">{formattedDate}</span>
+            <span className="text-sm text-gray-400 flex-shrink-0 mx-2 hidden md:block">{formattedDate}</span>
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -54,30 +54,5 @@ export function OlConfig({ config, createdAt }: { config: string; createdAt: Dat
                 </Tooltip>
             </TooltipProvider>
         </div>
-    );
-    return (
-        <>
-            <CardContent className="max-md:p-0">
-                <Textarea
-                    readOnly
-                    value={config}
-                    className="font-mono text-sm h-64 mb-4 bg-gray-800 text-white border-gray-700 focus:ring-gray-700 focus:border-gray-700"
-                    placeholder="Nothing..."
-                />
-                <div className="flex gap-4">
-                    <Button onClick={() => copyToClipboard(config)} className="w-full">
-                        {copied ? (
-                            <>
-                                <Check className="mr-2 h-4 w-4" /> Хууллаа
-                            </>
-                        ) : (
-                            <>
-                                <Copy className="mr-2 h-4 w-4" /> Хуулах
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </CardContent>
-        </>
     );
 }
