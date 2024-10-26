@@ -1,3 +1,5 @@
+"use server";
+
 import { cookies } from "next/headers";
 import { SessionData, sessionOptions } from "./types";
 import { getIronSession } from "iron-session";
