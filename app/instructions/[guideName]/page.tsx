@@ -9,7 +9,6 @@ async function getData(guideName: string) {
     const fullPath = path.join(config.guideDir, `${guideName}.md`);
     const fileContents = fs.readFileSync(fullPath, "utf8");
     const matterResult = matter(fileContents);
-    console.log(fileContents);
 
     const processedContent = await remark().use(html).process(matterResult.content);
     const contentHtml = processedContent.toString();
