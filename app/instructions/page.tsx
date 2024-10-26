@@ -14,11 +14,29 @@ export default function Page() {
                     <Card className="bg-gray-800 border-gray-700">
                         <CardHeader>
                             <CardTitle>
+                                <h1 className="text-blue-400 hover:text-blue-300 transition-colors">OutlineVPN ашиглах</h1>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            <p className="text-gray-300">OutlineVPN нь VPN тохиргоог линкээр амархан суулгана.</p>
+                            <ul className="text-blue-400 hover:text-blue-300 transition-colors">
+                                <li>
+                                    <Link href={"/instructions/iphone-outlinevpn"}>iPhone</Link>
+                                </li>
+                                <li>
+                                    <Link href={"/instructions/macOS-outlinevpn"}>macOS</Link>
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-gray-800 border-gray-700">
+                        <CardHeader>
+                            <CardTitle>
                                 <h1 className="text-blue-400 hover:text-blue-300 transition-colors">OpenVPN ашиглах</h1>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                            <p className="text-gray-300">OpenVPN нь VPN тохиргоог линкээр амархан суулгана.</p>
+                            <p className="text-gray-300">OpenVPN нь VPN тохиргоог файлаар амархан суулгана.</p>
                             <ul className="text-blue-400 hover:text-blue-300 transition-colors">
                                 <li>
                                     <Link href={"/instructions/iphone-openvpn"}>iPhone</Link>
@@ -33,15 +51,16 @@ export default function Page() {
                     <Card className="bg-gray-800 border-gray-700">
                         <CardHeader>
                             <CardTitle>
-                                <Link href="/instructions/wireguard" className="text-blue-400 hover:text-blue-300 transition-colors">
-                                    Wireguard ашиглах
-                                </Link>
+                                <h1 className="text-blue-400 hover:text-blue-300 transition-colors">Wireguard ашиглах</h1>
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-2">
                             <p className="text-gray-300">
                                 Wireguard нь VPN тохиргоог QR кодоор хялбархан суулгана. Түлхүүр бүр зөвхөн нэг төхөөрөмжид зориулагдсан.
                             </p>
+                            <Link href="/instructions/wireguard" className="text-blue-400 hover:text-blue-300 transition-colors">
+                                Бүх платформууд
+                            </Link>
                         </CardContent>
                     </Card>
                 </div>

@@ -25,38 +25,38 @@ date: "2024-10-25"
 
 -   Нэмэх "+" товч дээр дарсаны дараа татаж болох файл гарж ирнэ.
 
-![iphone-ovpn](/key-gen-mobile-ovpn.png)
+![mobile-image](/key-gen-mobile-ovpn.png)
 
 ## Тохиргоо
 
 -   Гарж ирсэн файлыг нь татаарай.
 
-![iphone-ovpn](/iphone-ovpn-0.png)
+![mobile-image](/iphone-ovpn-0.png)
 
 -   Downloads руугаа ороорой. Дараа нь user-\*.ovpn файл дээр дараарай
 
-![iphone-ovpn](/iphone-ovpn-1.jpg)
+![mobile-image](/iphone-ovpn-1.jpg)
 
 -   Share товч дээр дараарай
 
-![iphone-ovpn](/iphone-ovpn-2.jpg)
+![mobile-image](/iphone-ovpn-2.jpg)
 
 -   OpenVPN аппыг суулгасан тохиолдолд ийм товч гарч ирнэ. OpenVPN дээр дараарай.
 
-![iphone-ovpn](/iphone-ovpn-3.jpg)
+![mobile-image](/iphone-ovpn-3.jpg)
 
 -   "Add" гэсэн товч дээр дарж тохиргоог нэмнэ.
 
-![iphone-ovpn](/iphone-ovpn-4.jpg)
+![mobile-image](/iphone-ovpn-4.jpg)
 
 -   "Connect" гэсэн товч дээр дарааарай
 
-![iphone-ovpn](/iphone-ovpn-5.jpg)
+![mobile-image](/iphone-ovpn-5.jpg)
 
 -   Шинэ VPN учир "Allow" товч дээр дарах хэрэгтэй
 
-![iphone-ovpn](/iphone-ovpn-6.jpg)
+![mobile-image](/iphone-ovpn-6.jpg)
 
 -   Утасныхаа нууц үгийг хийгээрэй. Тэгээд enjoy!
 
-![iphone-ovpn](/iphone-ovpn-7.png)
+![mobile-image](/iphone-ovpn-7.png)

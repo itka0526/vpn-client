@@ -11,7 +11,7 @@ date: "2024-10-25"
 
 -   Хэрэв таны Mac (ARM) 2020 оноос дээш бол баруун талд байгаагийн сонгоорой Setup хийх явцдаа.
 
-![macos-ovpn](/macos-ovpn-install-0.png)
+![desktop-image](/macos-ovpn-install-0.png)
 
 ## Бүртгүүлэх
 
@@ -29,26 +29,26 @@ date: "2024-10-25"
 
 -   Нэмэх "+" товч дээр дарсаны дараа татаж болох файл гарж ирнэ.
 
-![macos-ovpn](/macos-ovpn-0.png)
+![desktop-image](/macos-ovpn-0.png)
 
 ## Тохиргоо
 
 -   Гарж ирсэн файлыг нь татаарай.
 
-![macos-ovpn](/macos-ovpn-1.png)
+![desktop-image](/macos-ovpn-1.png)
 
 -   Downloads руугаа ороорой. Дараа нь user-\*.ovpn файл дээр 2 дараарай.
 
-![macos-ovpn](/macos-ovpn-2.png)
+![desktop-image](/macos-ovpn-2.png)
 
 -   "OK" товч дээр дараарай
 
-![macos-ovpn](/macos-ovpn-3.png)
+![desktop-image](/macos-ovpn-3.png)
 
 -   OpenVPN аппыг суулгасан тохиолдолд ийм товч гарч ирнэ. OpenVPN дээр дараарай.
 
-![macos-ovpn](/macos-ovpn-4.png)
+![desktop-image](/macos-ovpn-4.png)
 
--   "Connect" гэсэн товч дээр дарааарай. Enjoy!
+-   "Connect" гэсэн товч дээр дарааарай. Enjoy! 🔥🔥
 
-![macos-ovpn](/macos-ovpn-5.png)
+![desktop-image](/macos-ovpn-5.png)
