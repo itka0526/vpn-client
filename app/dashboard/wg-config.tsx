@@ -5,20 +5,12 @@ import { CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Copy, LucideQrCode, XIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "react-hot-toast";
 import QRCode from "react-qr-code";
+import { useCopy } from "./copy";
 
 export function WgConfig({ config }: { config: string }) {
-    const [copied, setCopied] = useState(false);
     const [open, setOpen] = useState(false);
-
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText(config).then(() => {
-            setCopied(true);
-            toast.success("Хууллаа!");
-            setTimeout(() => setCopied(false), 2000);
-        });
-    };
+    const { copied, copyToClipboard } = useCopy();
 
     return (
         <>
@@ -46,7 +38,7 @@ export function WgConfig({ config }: { config: string }) {
                     <Button onClick={() => setOpen(true)}>
                         <LucideQrCode />
                     </Button>
-                    <Button onClick={copyToClipboard} className="w-full">
+                    <Button onClick={() => copyToClipboard(config)} className="w-full">
                         {copied ? (
                             <>
                                 <Check className="mr-2 h-4 w-4" /> Хууллаа

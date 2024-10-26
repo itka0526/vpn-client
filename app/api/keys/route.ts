@@ -1,9 +1,11 @@
 import { config } from "@/lib/config";
-import prisma from "@/lib/db";
 import { getSession } from "@/lib/session-server";
-import { AllVPNTypes } from "@/lib/types";
+import { AllVPNTypes, OutlineVPNRespType } from "@/lib/types";
 import { Key, VPNType } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { Agent } from "https";
+import prisma from "@/lib/db";
+import axios from "axios";
 
 export type KeyRouteRespType = { message: string } & (
     | {
@@ -47,30 +49,65 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
     const vt: VPNType = validatedVPNType.data;
     let resp: Response;
 
-    if (vt === "OpenVPN") {
-        resp = await fetch(`http://${process.env.OVIP}/create_new_user`, {
-            method: "POST",
-            body: JSON.stringify({ creds: process.env.OVPW }),
-        });
-    } else {
-        resp = await fetch(`http://${process.env.WGIP}/create_new_user`, {
-            method: "POST",
-            body: JSON.stringify({ creds: process.env.WGPW }),
-        });
+    switch (vt) {
+        case "OpenVPN":
+            resp = await fetch(`http://${process.env.OVIP}/create_new_user`, {
+                method: "POST",
+                body: JSON.stringify({ creds: process.env.OVPW }),
+            });
+            break;
+        case "WireGuardVPN":
+            resp = await fetch(`http://${process.env.WGIP}/create_new_user`, {
+                method: "POST",
+                body: JSON.stringify({ creds: process.env.WGPW }),
+            });
+            break;
+        case "OutlineVPN":
+            const axiosResp = await axios.post(`${process.env.OUTLINE_API}/access-keys`, null, {
+                httpsAgent: new Agent({
+                    rejectUnauthorized: false,
+                }),
+            });
+            if (axiosResp.statusText !== "Created") {
+                return NextResponse.json({ message: "Серверийг буруу тохируулсан байна.", status: false });
+            }
+            resp = new Response(JSON.stringify(axiosResp.data), { headers: { "Content-Type": "application/json" } });
+            break;
+        default:
+            return NextResponse.json({ message: "Серверийг буруу тохируулсан байна.", status: false });
     }
 
-    const data = await resp.text();
-    console.log(data);
-    if (data.startsWith("Success!")) {
-        const key = data.replace("Success! Output: ", "");
-        const [keyPath, keyConfig] = key.split("@#$");
+    if (vt === "OutlineVPN") {
+        // Handle outline vpn
+        const data = await resp.json();
+        const res = OutlineVPNRespType.safeParse(data);
+
+        if (!res.success) {
+            return NextResponse.json({ message: "Outline сервер буруу өгөгдөл буцаалаа.", status: false });
+        }
+        const { accessUrl, id } = res.data;
         try {
-            const genKey = await prisma.key.create({ data: { secret: keyConfig, userId: session.userId, keyPath: keyPath, type: vt } });
+            const genKey = await prisma.key.create({ data: { secret: accessUrl, userId: session.userId, keyPath: id, type: vt } });
             return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
         } catch (error) {
             return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });
         }
+    } else if (vt === "OpenVPN" || vt === "WireGuardVPN") {
+        // Handle wireguard and ovpn
+        const data = await resp.text();
+        if (data.startsWith("Success!")) {
+            const key = data.replace("Success! Output: ", "");
+            const [keyPath, keyConfig] = key.split("@#$");
+            try {
+                const genKey = await prisma.key.create({ data: { secret: keyConfig, userId: session.userId, keyPath: keyPath, type: vt } });
+                return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
+            } catch (error) {
+                return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });
+            }
+        } else {
+            return NextResponse.json({ message: "VPN сервер ажилахгүй байна.", status: false });
+        }
     } else {
-        return NextResponse.json({ message: "VPN сервер ажилахгүй байна.", status: false });
+        return NextResponse.json({ message: "Сервер дээр буруу тохируулго байна.", status: false });
     }
 }

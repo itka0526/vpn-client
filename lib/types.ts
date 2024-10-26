@@ -29,7 +29,7 @@ export const RegisterUserSchema = UserSchema.omit({ id: true, createdAt: true, u
 
 export const LoginUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true, activeTill: true, banned: true });
 
-export const AllVPNTypes = z.enum(["WireGuardVPN", "OpenVPN"]) satisfies ZodType<VPNType>;
+export const AllVPNTypes = z.enum(["WireGuardVPN", "OpenVPN", "OutlineVPN"]) satisfies ZodType<VPNType>;
 
 export type FormState = {
     errors?: typeToFlattenedError<z.infer<typeof RegisterUserSchema> | z.infer<typeof LoginUserSchema>>["fieldErrors"];
@@ -47,3 +47,21 @@ export const sessionOptions: SessionOptions = {
         secure: true,
     },
 };
+
+export interface OutlineVPNResponse {
+    id: string;
+    name: string;
+    password: string;
+    port: number;
+    method: string;
+    accessUrl: string;
+}
+
+export const OutlineVPNRespType = z.object({
+    id: z.string(),
+    name: z.string(),
+    password: z.string(),
+    port: z.number(),
+    method: z.string(),
+    accessUrl: z.string(),
+}) satisfies ZodType<OutlineVPNResponse>;
