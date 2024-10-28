@@ -24,7 +24,7 @@ export default function Page() {
                                     <Link href={"/instructions/iphone-outlinevpn"}>iPhone</Link>
                                 </li>
                                 <li>
-                                    <Link href={"/instructions/macOS-outlinevpn"}>macOS</Link>
+                                    <Link href={"/instructions/macos-outlinevpn"}>macOS</Link>
                                 </li>
                             </ul>
                         </CardContent>
@@ -45,7 +45,7 @@ export default function Page() {
                                     <Link href={"/instructions/iphone-openvpn"}>iPhone</Link>
                                 </li>
                                 <li>
-                                    <Link href={"/instructions/macOS-openvpn"}>macOS</Link>
+                                    <Link href={"/instructions/macos-openvpn"}>macOS</Link>
                                 </li>
                             </ul>
                         </CardContent>
