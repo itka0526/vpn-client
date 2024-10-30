@@ -22,8 +22,8 @@ export function OvConfig({ config, fileName, createdAt }: { config: string; file
         <Card className="m-0 md:mt-0 md:m-6 flex flex-col bg-gray-800 text-white border-gray-700 focus:ring-gray-700 focus:border-gray-700">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <FileCog className="h-5 w-5" />
-                    {fileName}
+                    <FileCog className="min-h-5 min-w-5" />
+                    <span>{fileName}</span>
                 </CardTitle>
             </CardHeader>
             <CardContent>
