@@ -20,13 +20,10 @@ export async function registerUser(prevState: FormState, formData: FormData): Pr
     // Creating a new entry in the database
     try {
         const { email, password } = validatedFields.data;
-        const currentDate = new Date().toISOString();
         await prisma.user.create({
             data: {
                 email,
                 password,
-                createdAt: currentDate,
-                updatedAt: currentDate,
             },
         });
     } catch (error) {
