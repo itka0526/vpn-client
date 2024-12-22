@@ -32,16 +32,18 @@ const main = new Menu<MyContext>("main-menu")
     .text("Заавар 🔗📱💻", async (ctx) => {
         await ctx.editMessageText(
             `
-<b>OpenVPN тохиргооны файлыг оруулахын тулд та дараах алхмуудыг хийж болно</b>:
+<b>OpenVPN тохиргооны заавар:</b>
 
-App Store/Play Store/Internet <b>OpenVPN</b> аппыг тат
-"OpenVPN Connect" нээх
-"Add" товчийг дарна уу
-"File" табыг дарна уу
-"Browse"-ийг дарна уу
-"<b>.ovpn</b>" файлыг олж, оруулна уу
-Шинэ <b>профайл</b> апп дээр харагдах болно
-
+App Store/Play Store/Internet <b>OpenVPN</b> аппыг татах
+Телеграм ботыг ашиглана уу
+Холболт -> Түлхүүр үүсгэх
+Түлхүүр файлыг татна уу
+"OpenVPN Connect" апп аа нээнэ үү
+"Add" товчийг дар
+"File" товчийг дар
+"Browse" товчийг дарна уу
+"<b>татсан_түлхүүр.ovpn</b>" файлыг сонгож, оруулна уу
+Эсвэл татсан түлхүүр файл аа "Open with OpenVPN Connect" гээд оруулж болно=
 `,
             { parse_mode: "HTML" }
         );
@@ -56,7 +58,7 @@ const connect = new Menu<MyContext>("connect-menu", {})
     .dynamic(async (ctx) => {
         if (!ctx.from) return;
         // TODO: Check if Vercel remove session data...
-        const keys = ctx.session.keys;
+        const keys = ctx.session.keys || [];
         const range = new MenuRange<MyContext>();
         for (let i = 0; i < keys.length; i++) {
             const vpnType = keys[i].type === "OpenVPN" ? "OpenVPN" : keys[i].type === "WireGuardVPN" ? "WireGuard" : "Outline";
@@ -84,10 +86,18 @@ const connect = new Menu<MyContext>("connect-menu", {})
         return range;
     })
     .text("Түлхүүрнүүд 🔄", async (ctx) => {
-        await ctx.editMessageText("Түр хүлээнэ үү...");
-        ctx.session.keys = await prisma.key.findMany({ where: { user: { email: `${ctx.from.id}${tgDomain}` } }, select: { type: true, id: true } });
-        ctx.menu.update();
-        return await ctx.editMessageText(`Шинэчлэгдсэн огноо: ${new Date().toLocaleString()}`);
+        try {
+            await ctx.editMessageText("Түр хүлээнэ үү...");
+            ctx.session.keys = await prisma.key.findMany({
+                where: { user: { email: `${ctx.from.id}${tgDomain}` } },
+                select: { type: true, id: true },
+            });
+            ctx.menu.update();
+            return await ctx.editMessageText(`Шинэчлэгдсэн огноо: ${new Date().toLocaleString()}`);
+        } catch (err) {
+            console.error(err);
+            return await ctx.editMessageText(`Алдаа гарлаа`);
+        }
     })
     .text("Түлхүүр үүсгэх 🔑", async (ctx) => {
         await ctx.editMessageText("Түр хүлээнэ үү...");
@@ -161,7 +171,7 @@ ${nu ? "Шинэ хэрэглэгч болгон 14 хоногийн үнэгү�
         });
         // Just don't do anything?
         if (user) {
-            ctx.session.keys = await prisma.key.findMany({ where: { userId: user.id }, select: { type: true, id: true } });
+            ctx.session.keys = (await prisma.key.findMany({ where: { userId: user.id }, select: { type: true, id: true } })) || [];
             await ctx.deleteMessages([loadingMessage.message_id]);
             return await init(user, false);
         }
@@ -184,5 +194,5 @@ pmBot.errorBoundary(async (err) => {
 
 export const POST = webhookCallback(bot, "std/http", {
     onTimeout: "return",
-    timeoutMilliseconds: 100,
+    timeoutMilliseconds: 2000,
 });
