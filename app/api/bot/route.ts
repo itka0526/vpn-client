@@ -17,7 +17,7 @@ if (!token) throw new Error("TELEGRAM_BOT_TOKEN environment variable not found."
 
 type MinKey = {
     id: Key["id"];
-    type: Key["type"];
+    type: Key["type"] | "WORKAROUND";
 };
 
 interface SessionData {
@@ -34,16 +34,20 @@ const main = new Menu<MyContext>("main-menu")
             `
 <b>OpenVPN тохиргооны заавар:</b>
 
-App Store/Play Store/Internet <b>OpenVPN</b> аппыг татах
-Телеграм ботыг ашиглана уу
-Холболт -> Түлхүүр үүсгэх
-Түлхүүр файлыг татна уу
-"OpenVPN Connect" апп аа нээнэ үү
-"Add" товчийг дар
-"File" товчийг дар
-"Browse" товчийг дарна уу
-"<b>татсан_түлхүүр.ovpn</b>" файлыг сонгож, оруулна уу
-Эсвэл татсан түлхүүр файл аа "Open with OpenVPN Connect" гээд оруулж болно=
+1. <b>App Store</b>, <b>Play Store</b>, эсвэл Интернэтээс <b>OpenVPN</b> аппыг татаж суулгаарай.
+
+2. Телеграм ботаар дамжуулан холболт хийж, <b>Түлхүүр үүсгэх</b> гэснийг сонгоно уу.
+
+3. Түлхүүр файлыг татаж авна уу.
+
+4. <b>"OpenVPN Connect"</b> аппийг нээгээд:
+   - <b>"Add"</b> товчийг дарна уу.
+   - <b>"File"</b> товчийг сонгоно уу.
+   - <b>"Browse"</b> товчийг дарна уу.
+
+5. Татсан <b>"татсан_түлхүүр.ovpn"</b> файлыг сонгож, оруулна уу.
+
+<em>Эсвэл, татсан түлхүүр файлаа "Open with OpenVPN Connect" гэж сонгож оруулж болно.</em>
 `,
             { parse_mode: "HTML" }
         );
@@ -52,7 +56,7 @@ App Store/Play Store/Internet <b>OpenVPN</b> аппыг татах
 const bot = new Bot<MyContext>(token);
 const pmBot = bot.chatType("private");
 
-pmBot.use(session({ initial: () => ({}), prefix: "user-" }));
+pmBot.use(session({ initial: () => ({ keys: [...Array(0)] }), prefix: "user-" }));
 
 const connect = new Menu<MyContext>("connect-menu", {})
     .dynamic(async (ctx) => {
@@ -194,5 +198,5 @@ pmBot.errorBoundary(async (err) => {
 
 export const POST = webhookCallback(bot, "std/http", {
     onTimeout: "return",
-    timeoutMilliseconds: 2000,
+    timeoutMilliseconds: 100,
 });
