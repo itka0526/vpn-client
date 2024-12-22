@@ -145,7 +145,6 @@ pmBot.use(main);
 
 pmBot.command("start", async (ctx) => {
     const loadingMessage = await ctx.reply("Уншиж байна... 🔄");
-    const password = `${randomBytes(5).toString("hex")}`;
     const generatedEmail = `${ctx.from.id}${tgDomain}`;
     const init = async (u: User, nu: boolean) => {
         const cnt = `
@@ -167,6 +166,7 @@ ${nu ? "Шинэ хэрэглэгч болгон 14 хоногийн үнэгү�
             return await init(user, false);
         }
         // Else we create the user
+        const password = `${randomBytes(5).toString("hex")}`;
         const newUser = await prisma.user.create({ data: { email: generatedEmail, password: password } });
         await ctx.deleteMessages([loadingMessage.message_id]);
         // Respond back to the user
@@ -184,5 +184,5 @@ pmBot.errorBoundary(async (err) => {
 
 export const POST = webhookCallback(bot, "std/http", {
     onTimeout: "return",
-    timeoutMilliseconds: 300,
+    timeoutMilliseconds: 100,
 });
