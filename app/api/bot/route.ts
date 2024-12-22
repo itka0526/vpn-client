@@ -170,9 +170,11 @@ ${nu ? "Шинэ хэрэглэгч болгон 14 хоногийн үнэгү�
     };
     try {
         // If the user is already registered
+        const searchingUser = await ctx.reply("Хэрэглэгчийг хайж байна... 🧑‍💻");
         const user = await prisma.user.findUnique({
             where: { email: generatedEmail },
         });
+        await ctx.deleteMessages([searchingUser.message_id]);
         // Just don't do anything?
         if (user) {
             ctx.session.keys = await prisma.key.findMany({ where: { userId: user.id }, select: { type: true, id: true } });
