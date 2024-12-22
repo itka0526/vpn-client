@@ -62,7 +62,7 @@ const connect = new Menu<MyContext>("connect-menu", {})
     .dynamic(async (ctx) => {
         if (!ctx.from) return;
         // TODO: Check if Vercel remove session data...
-        const keys = ctx.session.keys || [];
+        const keys = ctx.session.keys;
         const range = new MenuRange<MyContext>();
         for (let i = 0; i < keys.length; i++) {
             const vpnType = keys[i].type === "OpenVPN" ? "OpenVPN" : keys[i].type === "WireGuardVPN" ? "WireGuard" : "Outline";
@@ -175,7 +175,7 @@ ${nu ? "Шинэ хэрэглэгч болгон 14 хоногийн үнэгү�
         });
         // Just don't do anything?
         if (user) {
-            ctx.session.keys = (await prisma.key.findMany({ where: { userId: user.id }, select: { type: true, id: true } })) || [];
+            ctx.session.keys = await prisma.key.findMany({ where: { userId: user.id }, select: { type: true, id: true } });
             await ctx.deleteMessages([loadingMessage.message_id]);
             return await init(user, false);
         }
