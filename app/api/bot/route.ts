@@ -184,5 +184,5 @@ pmBot.errorBoundary(async (err) => {
 
 export const POST = webhookCallback(bot, "std/http", {
     onTimeout: "return",
-    timeoutMilliseconds: 3000,
+    timeoutMilliseconds: 300,
 });
