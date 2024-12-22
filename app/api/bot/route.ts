@@ -50,7 +50,7 @@ App Store/Play Store/Internet <b>OpenVPN</b> аппыг тат
 const bot = new Bot<MyContext>(token);
 const pmBot = bot.chatType("private");
 
-pmBot.use(session({ initial: () => ({ keys: new Array() }), prefix: "user-" }));
+pmBot.use(session({ initial: () => ({ keys: [{}] }), prefix: "user-" }));
 
 const connect = new Menu<MyContext>("connect-menu", {})
     .dynamic(async (ctx) => {
