@@ -56,7 +56,7 @@ const connect = new Menu<MyContext>("connect-menu", {})
     .dynamic(async (ctx) => {
         if (!ctx.from) return;
         // TODO: Check if Vercel remove session data...
-        let keys = ctx.session.keys;
+        const keys = ctx.session.keys;
         const range = new MenuRange<MyContext>();
         for (let i = 0; i < keys.length; i++) {
             const vpnType = keys[i].type === "OpenVPN" ? "OpenVPN" : keys[i].type === "WireGuardVPN" ? "WireGuard" : "Outline";
@@ -109,7 +109,7 @@ const connect = new Menu<MyContext>("connect-menu", {})
         if (_count.keys >= config.deviceLimitPerAcc) {
             return await ctx.editMessageText(`Түлхүүрний хязгаар хэтэрсэн байна. (${_count.keys}/${config.deviceLimitPerAcc})`);
         }
-        let resp: Response = await fetch(`http://${process.env.OVIP}/create_new_user`, {
+        const resp: Response = await fetch(`http://${process.env.OVIP}/create_new_user`, {
             method: "POST",
             body: JSON.stringify({ creds: process.env.OVPW }),
         });
