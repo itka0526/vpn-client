@@ -51,11 +51,11 @@ const connect = new Menu<MyContext>("connect-menu", {})
         }
         return range;
     })
-    .submenu("iOS 🍎📱", "instructions", async (ctx) => await ctx.editMessageText(iosInstructionsText))
-    .submenu("Android 🤖📱", "instructions", async (ctx) => await ctx.editMessageText(androidInstructionsText))
+    .submenu("iOS 🍎📱", "instructions", async (ctx) => await ctx.editMessageText(iosInstructionsText, { parse_mode: "HTML" }))
+    .submenu("Android 🤖📱", "instructions", async (ctx) => await ctx.editMessageText(androidInstructionsText, { parse_mode: "HTML" }))
     .row()
-    .submenu("Windows 🪟💻", "instructions", async (ctx) => await ctx.editMessageText(windowsInstructionsText))
-    .submenu("macOS 🍏💻", "instructions", async (ctx) => await ctx.editMessageText(macosInstructionsText))
+    .submenu("Windows 🪟💻", "instructions", async (ctx) => await ctx.editMessageText(windowsInstructionsText, { parse_mode: "HTML" }))
+    .submenu("macOS 🍏💻", "instructions", async (ctx) => await ctx.editMessageText(macosInstructionsText, { parse_mode: "HTML" }))
     .row()
     .text("Түлхүүрнүүд 🔄", async (ctx) => {
         try {
@@ -124,7 +124,10 @@ const connect = new Menu<MyContext>("connect-menu", {})
     .back("Үндсэн цэс рүү буцах ⬅️", goBackToMain);
 const payment = new Menu<MyContext>("payment-menu").back("Үндсэн цэс рүү буцах ⬅️", goBackToMain);
 
-const instructions = new Menu<MyContext>("instructions").back("Холбох цэс руу буцах ⬅️", async (ctx) => await ctx.editMessageText(connectText));
+const instructions = new Menu<MyContext>("instructions").back(
+    "Холбох цэс руу буцах ⬅️",
+    async (ctx) => await ctx.editMessageText(connectText, { parse_mode: "HTML" })
+);
 
 main.register(connect);
 main.register(payment);
@@ -133,7 +136,7 @@ connect.register(instructions);
 pmBot.use(main);
 
 pmBot.command("start", async (ctx) => {
-    const loadingMessage = await ctx.reply("Уншиж байна... 🔄");
+    const loadingMessage = await ctx.reply("Уншиж байна... 🔄", { parse_mode: "HTML" });
     const generatedEmail = `${ctx.from.id}${tgDomain}`;
 
     try {
