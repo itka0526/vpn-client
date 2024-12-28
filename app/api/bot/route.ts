@@ -18,7 +18,7 @@ import {
     windowsInstructionsText,
 } from "./menu";
 import { config } from "@/lib/config";
-import { createHiddifyKey, HIDDIFY_API_ADMIN_BASE_URL, HIDDIFY_API_USER_BASE_URL, HiddifyKeyResponseType } from "./hiddify";
+import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL } from "./hiddify";
 import { MyContext } from "./types";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;

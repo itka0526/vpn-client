@@ -1,7 +1,7 @@
 import prisma from "@/lib/db";
 import { Key } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { HIDDIFY_API_ADMIN_BASE_URL, HiddifyKeyResponseType, removeHiddifyKeyDetails } from "../bot/hiddify";
+import { HiddifyKeyResponseType, removeHiddifyKeyDetails } from "../bot/hiddify";
 
 export async function GET() {
     const res = await prisma.user.findMany({
