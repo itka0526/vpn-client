@@ -6,13 +6,15 @@ import { Check, Copy, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Link from "next/link";
 
-export function OlConfig({ config, createdAt }: { config: string; createdAt: Date }) {
+export function LinkConfig({ config, createdAt }: { config: string; createdAt: Date }) {
     const { copied, copyToClipboard } = useCopy();
-    const formattedDate = createdAt.toLocaleDateString("mn-MN", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
+    const formattedDate = createdAt.toLocaleDateString
+        ? createdAt.toLocaleDateString("mn-MN", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+          })
+        : "Саяхан...";
     return (
         <div className="flex items-center justify-between m-0 md:mx-6 px-6 py-2 border bg-gray-800 border-gray-700 focus:ring-gray-700 focus:border-gray-700 rounded-md">
             <TooltipProvider>

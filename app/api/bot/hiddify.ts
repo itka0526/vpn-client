@@ -1,6 +1,6 @@
-export interface HiddifyKeyResponseType {
+export type HiddifyKeyResponseType = {
     added_by_uuid: string;
-    comment: null;
+    comment: null | string;
     current_usage_GB: number;
     ed25519_private_key: string;
     ed25519_public_key: string;
@@ -8,19 +8,19 @@ export interface HiddifyKeyResponseType {
     id: number;
     is_active: boolean;
     lang: string;
-    last_online: null;
-    last_reset_time: null;
+    last_online: null | string;
+    last_reset_time: null | string;
     mode: string;
     name: string;
     package_days: number;
-    start_date: string;
+    start_date: null | string;
     telegram_id: number;
     usage_limit_GB: number;
     uuid: string;
     wg_pk: string;
     wg_psk: string;
     wg_pub: string;
-}
+};
 
 const getHiddifyUrls = () => {
     const baseUrl = process.env.HIDDIFY_API_BASE_URL;
@@ -52,7 +52,7 @@ async function createHiddifyKey(telegramId: number, name: string) {
         last_reset_time: null,
         mode: "monthly",
         name: name,
-        package_days: null,
+        package_days: 365 * 10,
         start_date: new Date().toISOString().split("T")[0],
         telegram_id: telegramId,
         usage_limit_GB: null,

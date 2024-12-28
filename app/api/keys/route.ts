@@ -1,11 +1,13 @@
 import { config } from "@/lib/config";
 import { getSession } from "@/lib/session-server";
-import { AllVPNTypes, OutlineVPNRespType } from "@/lib/types";
+import { AllVPNTypes, HiddifyKey, OutlineVPNRespType } from "@/lib/types";
 import { Key, VPNType } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { Agent } from "https";
 import prisma from "@/lib/db";
 import axios from "axios";
+import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL } from "../bot/hiddify";
+import { tgDomain } from "../bot/menu";
 
 export type KeyRouteRespType = { message: string } & (
     | {
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
     // Check if limit exceeded and if the user is banned
     const dbRes = await prisma.user.findUnique({
         where: { id: session.userId },
-        select: { banned: true, activeTill: true, _count: { select: { keys: true } } },
+        select: { email: true, banned: true, activeTill: true, _count: { select: { keys: true } } },
     });
     if (!dbRes) {
         return NextResponse.json({ message: "Өгөгдлийн санд алдаа гарлаа.", status: false });
@@ -73,11 +75,38 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
             }
             resp = new Response(JSON.stringify(axiosResp.data), { headers: { "Content-Type": "application/json" } });
             break;
+        case "HiddifyVPN":
+            let tgId = 0;
+            if (dbRes.email.endsWith(tgDomain) && /^-?\d+$/.test(dbRes.email.split("@")[0])) tgId = parseInt(dbRes.email.split("@")[0]);
+            const hiddifyKey = await createHiddifyKey(tgId, `key_${tgId ?? dbRes.email.split("@")[0]}_${_count.keys}`);
+            resp = new Response(JSON.stringify(hiddifyKey), { headers: { "Content-Type": "application/json" } });
+            break;
         default:
             return NextResponse.json({ message: "Серверийг буруу тохируулсан байна.", status: false });
     }
 
-    if (vt === "OutlineVPN") {
+    if (vt === "HiddifyVPN") {
+        try {
+            const data = await resp.json();
+            const res = HiddifyKey.safeParse(data);
+            if (!res.success) {
+                console.log(data, res.error);
+                return NextResponse.json({ message: "Hiddify сервер буруу өгөгдөл буцаалаа.", status: false });
+            }
+            const { data: key } = res;
+            const genKey = await prisma.key.create({
+                data: {
+                    userId: session.userId,
+                    type: "HiddifyVPN",
+                    keyPath: HIDDIFY_API_USER_BASE_URL.toString() + `/${key.uuid}`,
+                    secret: JSON.stringify(key),
+                },
+            });
+            return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
+        } catch (error) {
+            return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });
+        }
+    } else if (vt === "OutlineVPN") {
         // Handle outline vpn
         const data = await resp.json();
         const res = OutlineVPNRespType.safeParse(data);

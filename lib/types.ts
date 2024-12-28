@@ -2,6 +2,31 @@ import { typeToFlattenedError, z, ZodType } from "zod";
 
 import { User, VPNType } from "@prisma/client";
 import { SessionOptions } from "iron-session";
+import { HiddifyKeyResponseType } from "@/app/api/bot/hiddify";
+
+export const HiddifyKey = z.object({
+    added_by_uuid: z.string(),
+    comment: z.null().or(z.string()),
+    current_usage_GB: z.number(),
+    ed25519_private_key: z.string(),
+    ed25519_public_key: z.string(),
+    enable: z.boolean(),
+    id: z.number(),
+    is_active: z.boolean(),
+    lang: z.string(),
+    last_online: z.null().or(z.string()),
+    last_reset_time: z.null().or(z.string()),
+    mode: z.string(),
+    name: z.string(),
+    package_days: z.number(),
+    start_date: z.null().or(z.string()),
+    telegram_id: z.number(),
+    usage_limit_GB: z.number(),
+    uuid: z.string(),
+    wg_pk: z.string(),
+    wg_psk: z.string(),
+    wg_pub: z.string(),
+}) satisfies ZodType<HiddifyKeyResponseType>;
 
 export type PartialUser = Pick<User, "email" | "banned" | "activeTill">;
 
@@ -31,7 +56,7 @@ export const RegisterUserSchema = UserSchema.omit({ id: true, createdAt: true, u
 
 export const LoginUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true, activeTill: true, banned: true });
 
-export const AllVPNTypes = z.enum(["WireGuardVPN", "OpenVPN", "OutlineVPN"]) satisfies ZodType<VPNType>;
+export const AllVPNTypes = z.enum(["WireGuardVPN", "OpenVPN", "OutlineVPN", "HiddifyVPN"]) satisfies ZodType<VPNType>;
 
 export type FormState = {
     errors?: typeToFlattenedError<z.infer<typeof RegisterUserSchema> | z.infer<typeof LoginUserSchema>>["fieldErrors"];
