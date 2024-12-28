@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import { Key } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { HIDDIFY_API_ADMIN_BASE_URL, HiddifyKeyResponseType, removeHiddifyKeyDetails } from "../bot/hiddify";
 
 export async function GET() {
     const res = await prisma.user.findMany({
@@ -15,12 +16,14 @@ export async function GET() {
     });
 
     const wgKeys: Key[] = [],
-        ovKeys: Key[] = [];
+        ovKeys: Key[] = [],
+        hiKeys: Key[] = [];
 
     for (const user of res) {
         for (const key of user.keys) {
             if (key.type === "OpenVPN") ovKeys.push(key);
             if (key.type === "WireGuardVPN") wgKeys.push(key);
+            if (key.type === "HiddifyVPN") hiKeys.push(key);
         }
     }
 
@@ -44,11 +47,24 @@ export async function GET() {
 
     let response = "";
 
+    if (hiKeys.length >= 1) {
+        for (const hiKey of hiKeys) {
+            const keyData = JSON.parse(hiKey.secret) as HiddifyKeyResponseType;
+            try {
+                await removeHiddifyKeyDetails(keyData.uuid);
+                response += `${keyData.name}, `;
+            } catch (error) {
+                console.error(error);
+                response += `error hiddify...`;
+            }
+        }
+    }
+
     if (wgKeys.length >= 1) {
         const resp = await fetch(`http://${etwg}/delete_user`, {
             method: "POST",
             body: JSON.stringify({
-                creds: process.env.WGPW + "\n",
+                creds: process.env.WGPW,
                 keys: wgKeys.map((k) => k.keyPath),
             }),
         });
@@ -82,7 +98,7 @@ export async function GET() {
 
     // Delete all keys from database
     try {
-        await deleteKeysFromDB(wgKeys.concat(ovKeys));
+        await deleteKeysFromDB(wgKeys.concat(ovKeys).concat(hiKeys));
     } catch (error) {
         return NextResponse.json({ ok: true, message: response });
     }

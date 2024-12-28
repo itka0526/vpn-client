@@ -35,4 +35,5 @@ enum VPNType {
   WireGuardVPN
   OpenVPN
   OutlineVPN
+  HiddifyVPN
 }

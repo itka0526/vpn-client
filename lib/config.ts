@@ -10,4 +10,5 @@ export const config = {
     accountDetails: "2202 2036 8986 5022",
     bankType: "Сбербанк - Итгэлт",
     paymentAmountPerMonth: 150,
+    usageLimitGB: null,
 };
