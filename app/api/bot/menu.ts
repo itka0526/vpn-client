@@ -60,7 +60,7 @@ export const iosInstructionsText = `
 
 ENJOY! Тохиргоо дууссан ✅🎉
 
-https://apps.apple.com/mn/app/v2raytun/id6476628951
+https://apps.apple.com/us/app/hiddify-proxy-vpn/id6596777532
 `;
 
 export const androidInstructionsText = `
