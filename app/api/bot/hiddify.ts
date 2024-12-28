@@ -14,7 +14,7 @@ export type HiddifyKeyResponseType = {
     name: string;
     package_days: number;
     start_date: null | string;
-    telegram_id: number;
+    telegram_id: number | null;
     usage_limit_GB: number;
     uuid: string;
     wg_pk: string;

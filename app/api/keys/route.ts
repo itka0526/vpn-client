@@ -90,7 +90,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
             const data = await resp.json();
             const res = HiddifyKey.safeParse(data);
             if (!res.success) {
-                console.log(data, res.error);
+                console.log(res.error);
                 return NextResponse.json({ message: "Hiddify сервер буруу өгөгдөл буцаалаа.", status: false });
             }
             const { data: key } = res;

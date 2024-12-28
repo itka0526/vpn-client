@@ -88,7 +88,7 @@ export const windowsInstructionsText = `
 
 ENJOY! Тохиргоо дууссан ✅🎉
 
-https://github.com/hiddify/hiddify-app/releases/latest/download/Hiddify-Windows-Setup-x64.Msix
+https://apps.microsoft.com/detail/9pdfnl3qv2s5?hl=en-US&gl=US
 `;
 
 export const macosInstructionsText = `

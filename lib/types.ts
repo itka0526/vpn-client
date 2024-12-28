@@ -20,7 +20,7 @@ export const HiddifyKey = z.object({
     name: z.string(),
     package_days: z.number(),
     start_date: z.null().or(z.string()),
-    telegram_id: z.number(),
+    telegram_id: z.number().or(z.null()),
     usage_limit_GB: z.number(),
     uuid: z.string(),
     wg_pk: z.string(),
