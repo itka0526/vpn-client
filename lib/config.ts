@@ -12,7 +12,11 @@ export const config = {
     paymentAmountPerMonth: 150,
     usageLimitGB: null,
     wireguard: false,
-    openvpn: true,
-    outline: true,
+    openvpn: false,
+    outline: false,
     hiddify: true,
+    disableRegister: true,
+    telegramBot: "https://t.me/galvpn_bot",
+    adminTelegramId: "5434394300",
+    website: "https://www.galvpn.com",
 };

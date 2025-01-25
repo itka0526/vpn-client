@@ -14,6 +14,7 @@ import {
     macosInstructionsText,
     mainText,
     paymentText,
+    reportIssueText,
     tgDomain,
     windowsInstructionsText,
 } from "./menu";
@@ -32,7 +33,9 @@ const main = new Menu<MyContext>("main-menu")
         "Төлбөр төлөх 📲💳",
         "payment-menu",
         async (ctx) => await ctx.editMessageText(paymentText(`${ctx.from.id}${tgDomain}`), { parse_mode: "HTML" })
-    );
+    )
+    .text("Санал хүсэлт 🚨📩", async (ctx) => await ctx.reply("📍 Та бот руу шууд хүсэлтээ бичнэ үү."))
+    .row();
 
 const bot = new Bot<MyContext>(token);
 const pmBot = bot.chatType("private");
@@ -40,23 +43,25 @@ const pmBot = bot.chatType("private");
 pmBot.use(session({ initial: () => ({ keys: [...Array(0)] }), prefix: "user-" }));
 
 const connect = new Menu<MyContext>("connect-menu", {})
-    .dynamic(async (ctx) => {
-        if (!ctx.from) return;
-        const keys = ctx.session.keys;
-        const range = new MenuRange<MyContext>();
-        for (let i = 0; i < keys.length; i++) {
-            const vpnType = keys[i].type;
-            const displayName = `Түлхүүр (${vpnType.toString()}) ${i + 1} 🗝️`;
-            range.copyText(displayName, keys[i].keyPath).row();
-        }
-        return range;
-    })
     .submenu("iOS 🍎📱", "instructions", async (ctx) => await ctx.editMessageText(iosInstructionsText, { parse_mode: "HTML" }))
     .submenu("Android 🤖📱", "instructions", async (ctx) => await ctx.editMessageText(androidInstructionsText, { parse_mode: "HTML" }))
     .row()
     .submenu("Windows 🪟💻", "instructions", async (ctx) => await ctx.editMessageText(windowsInstructionsText, { parse_mode: "HTML" }))
     .submenu("macOS 🍏💻", "instructions", async (ctx) => await ctx.editMessageText(macosInstructionsText, { parse_mode: "HTML" }))
     .row()
+    .dynamic(async (ctx) => {
+        if (!ctx.from) return;
+        const keys = ctx.session.keys;
+        const range = new MenuRange<MyContext>();
+        if (keys.length >= 1) range.text("----------------------").row();
+        for (let i = 0; i < keys.length; i++) {
+            const vpnType = keys[i].type;
+            const displayName = `Миний түлхүүр (${vpnType.toString()}) ${i + 1} 🗝️`;
+            range.copyText(displayName, keys[i].keyPath).row();
+        }
+        if (keys.length >= 1) range.text("----------------------").row();
+        return range;
+    })
     .text("Түлхүүрнүүд 🔄", async (ctx) => {
         try {
             await ctx.editMessageText(connectText + "\n⏳ <b>Таны түлхүүрнүүдийг хайж байна...</b>", { parse_mode: "HTML" });
@@ -170,7 +175,22 @@ pmBot.errorBoundary(async (err) => {
     return await err.ctx.reply(`${err.error}`);
 });
 
+pmBot.on("msg:text", async (ctx) => {
+    try {
+        await ctx.api.sendMessage(
+            config.adminTelegramId,
+            reportIssueText(
+                ctx.message.from.username ? `@${ctx.message.from.username} [${ctx.message.from.id}]` : `Anonymous [${ctx.message.from.id}]`,
+                ctx.message.text
+            )
+        );
+    } catch (e) {
+        console.error(e);
+        await ctx.api.sendMessage(config.adminTelegramId, "Алдаа гарлаа... Мессеж илгээгдсэнгүй.");
+    }
+});
+
 export const POST = webhookCallback(bot, "std/http", {
-    // onTimeout: "return",
-    // timeoutMilliseconds: 100,
+    onTimeout: "return",
+    timeoutMilliseconds: 100,
 });
