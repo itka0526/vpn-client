@@ -202,6 +202,6 @@ pmBot.on("msg:text", async (ctx) => {
 });
 
 export const POST = webhookCallback(bot, "std/http", {
-    onTimeout: "return",
-    timeoutMilliseconds: 100,
+    // onTimeout: "return",
+    // timeoutMilliseconds: 100,
 });
