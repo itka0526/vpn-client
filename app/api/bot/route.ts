@@ -2,25 +2,30 @@ export const dynamic = "force-dynamic";
 
 export const fetchCache = "force-no-store";
 
-import { Bot, session, webhookCallback } from "grammy";
+import { Bot, InlineKeyboard, session, webhookCallback } from "grammy";
 import prisma from "@/lib/db";
 import { randomBytes } from "crypto";
 import { Menu, MenuRange } from "@grammyjs/menu";
 import {
     androidInstructionsText,
+    askText,
     connectText,
     goBackToMain,
     iosInstructionsText,
+    iPaidMessage,
     macosInstructionsText,
     mainText,
     paymentText,
     reportIssueText,
     tgDomain,
+    usersList,
     windowsInstructionsText,
 } from "./menu";
 import { config } from "@/lib/config";
 import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL } from "./hiddify";
 import { MyContext } from "./types";
+import { extendByOneMonth, extendBySetDays } from "./helper";
+import { User } from "@prisma/client";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -34,7 +39,15 @@ const main = new Menu<MyContext>("main-menu")
         "payment-menu",
         async (ctx) => await ctx.editMessageText(paymentText(`${ctx.from.id}${tgDomain}`), { parse_mode: "HTML" })
     )
-    .text("Санал хүсэлт 🚨📩", async (ctx) => await ctx.reply("📍 Та бот руу шууд хүсэлтээ бичнэ үү."))
+    .row()
+    .text(
+        "Санал хүсэлт 🚨📩",
+        async (ctx) =>
+            await ctx.reply(askText, {
+                parse_mode: "HTML",
+                link_preview_options: { prefer_large_media: true },
+            })
+    )
     .row();
 
 const bot = new Bot<MyContext>(token);
@@ -53,31 +66,15 @@ const connect = new Menu<MyContext>("connect-menu", {})
         if (!ctx.from) return;
         const keys = ctx.session.keys;
         const range = new MenuRange<MyContext>();
-        if (keys.length >= 1) range.text("----------------------").row();
+        if (keys.length >= 1) range.text("------------------------").row();
         for (let i = 0; i < keys.length; i++) {
             const vpnType = keys[i].type;
             const displayName = `Миний түлхүүр (${vpnType.toString()}) ${i + 1} 🗝️`;
             range.copyText(displayName, keys[i].keyPath).row();
         }
-        if (keys.length >= 1) range.text("----------------------").row();
+        if (keys.length >= 1) range.text("------------------------").row();
         return range;
     })
-    .text("Түлхүүрнүүд 🔄", async (ctx) => {
-        try {
-            await ctx.editMessageText(connectText + "\n⏳ <b>Таны түлхүүрнүүдийг хайж байна...</b>", { parse_mode: "HTML" });
-            ctx.session.keys = await prisma.key.findMany({
-                where: { user: { email: `${ctx.from.id}${tgDomain}` } },
-                select: { type: true, id: true, keyPath: true },
-            });
-            ctx.menu.update();
-            return await ctx.editMessageText(connectText + `\n<b>📅 Шинэчлэгдсэн огноо: ${new Date().toLocaleTimeString()}</b>`, {
-                parse_mode: "HTML",
-            });
-        } catch (err) {
-            return await ctx.editMessageText(connectText + `\n<b>👨‍💻 Алдаа гарлаа... Хөгжүүлэгчтэй холбоо барина уу</b>`, { parse_mode: "HTML" });
-        }
-    })
-    .row()
     .text("Түлхүүр үүсгэх 🔑", async (ctx) => {
         await ctx.editMessageText(connectText + "\n<b>⏳ Та түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
         const dbRes = await prisma.user.findUnique({
@@ -130,9 +127,37 @@ const connect = new Menu<MyContext>("connect-menu", {})
             return await ctx.editMessageText(connectText + "\n<b>🚫 Одоогоор түлхүүр үүсгэж болохгүй байна...</b>", { parse_mode: "HTML" });
         }
     })
+    .text("Түлхүүрнүүд 🔄", async (ctx) => {
+        try {
+            await ctx.editMessageText(connectText + "\n⏳ <b>Таны түлхүүрнүүдийг хайж байна...</b>", { parse_mode: "HTML" });
+            ctx.session.keys = await prisma.key.findMany({
+                where: { user: { email: `${ctx.from.id}${tgDomain}` } },
+                select: { type: true, id: true, keyPath: true },
+            });
+            ctx.menu.update();
+            return await ctx.editMessageText(connectText + `\n<b>📅 Шинэчлэгдсэн огноо: ${new Date().toLocaleTimeString()}</b>`, {
+                parse_mode: "HTML",
+            });
+        } catch (err) {
+            return await ctx.editMessageText(connectText + `\n<b>👨‍💻 Алдаа гарлаа... Хөгжүүлэгчтэй холбоо барина уу</b>`, { parse_mode: "HTML" });
+        }
+    })
+
     .row()
     .back("Үндсэн цэс рүү буцах ⬅️", goBackToMain);
-const payment = new Menu<MyContext>("payment-menu").back("Үндсэн цэс рүү буцах ⬅️", goBackToMain);
+const payment = new Menu<MyContext>("payment-menu")
+    .text("💰 Би төлсөн", async (userCtx) => {
+        await userCtx.api.sendMessage(
+            config.adminTelegramId,
+            iPaidMessage(
+                userCtx.from.username ? `@${userCtx.from.username} [${userCtx.from.id}]` : `Anonymous [${userCtx.from.id}]`,
+                `Хэрэглэгч төлбөр төллөө... (${new Date().toLocaleString()})`
+            ),
+            { parse_mode: "HTML" }
+        );
+    })
+    .row()
+    .back("Үндсэн цэс рүү буцах ⬅️", goBackToMain);
 
 const instructions = new Menu<MyContext>("instructions").back(
     "Холбох цэс руу буцах ⬅️",
@@ -160,7 +185,11 @@ pmBot.command("start", async (ctx) => {
         if (user) {
             ctx.session.keys = await prisma.key.findMany({ where: { userId: user.id }, select: { type: true, id: true, keyPath: true } });
             await ctx.deleteMessages([loadingMessage.message_id]);
-            return await ctx.reply(mainText(user), { reply_markup: main, parse_mode: "HTML", link_preview_options: { is_disabled: true } });
+            return await ctx.reply(mainText(user), {
+                reply_markup: main,
+                parse_mode: "HTML",
+                link_preview_options: { show_above_text: true, prefer_small_media: true },
+            });
         }
         // Else we create the user
         const password = `${randomBytes(5).toString("hex")}`;
@@ -188,6 +217,37 @@ pmBot.errorBoundary(async (err) => {
     return await err.ctx.reply(`${err.error}`);
 });
 
+pmBot.filter(
+    async (ctx) => {
+        return `${ctx.from.id}` === config.adminTelegramId;
+    },
+    async (ctx) => {
+        if (ctx.message?.text) {
+            if (ctx.message.text.startsWith("/users")) {
+                const users = await prisma.user.findMany({ select: { email: true } });
+                const list = "Хэрэглэгчид:\n" + usersList(users);
+                await ctx.reply(list);
+            } else if (ctx.message.text.startsWith("/extend")) {
+                const rawMessage = ctx.message.text;
+                const [_, userEmail, days] = rawMessage.split(" ");
+
+                await extendBySetDays(userEmail, Number(days));
+                await ctx.reply("ℹ️ Амжилттай");
+            } else {
+                await ctx.reply(`
+Командууд:
+
+# Хэрэглэгчидийн нэрсийн жагсалт
+/users
+
+# Сунгах - extend userEmail dayToAdd
+/extend
+            `);
+            }
+        }
+    }
+);
+
 pmBot.on("msg:text", async (ctx) => {
     try {
         await ctx.api.sendMessage(
@@ -205,6 +265,6 @@ pmBot.on("msg:text", async (ctx) => {
 });
 
 export const POST = webhookCallback(bot, "std/http", {
-    // onTimeout: "return",
-    // timeoutMilliseconds: 100,
+    onTimeout: "return",
+    timeoutMilliseconds: 100,
 });
