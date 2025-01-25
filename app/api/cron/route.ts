@@ -2,6 +2,7 @@ import prisma from "@/lib/db";
 import { Key } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { HiddifyKeyResponseType, removeHiddifyKeyDetails } from "../bot/hiddify";
+import { config } from "@/lib/config";
 
 export async function GET() {
     const res = await prisma.user.findMany({
@@ -41,13 +42,17 @@ export async function GET() {
             },
         });
 
-    if (!etwg || !wgpw || !etov || !ovpw) {
-        return NextResponse.json({ ok: false, message: "Environment bad." });
+    if (config.wireguard && (!etwg || !wgpw)) {
+        return NextResponse.json({ ok: false, message: "Wireguard environment variables missing." });
+    }
+
+    if (config.openvpn && (!etov || !ovpw)) {
+        return NextResponse.json({ ok: false, message: "OpenVPN environment variables missing." });
     }
 
     let response = "";
 
-    if (hiKeys.length >= 1) {
+    if (config.hiddify && hiKeys.length >= 1) {
         for (const hiKey of hiKeys) {
             const keyData = JSON.parse(hiKey.secret) as HiddifyKeyResponseType;
             try {
@@ -60,7 +65,7 @@ export async function GET() {
         }
     }
 
-    if (wgKeys.length >= 1) {
+    if (config.wireguard && wgKeys.length >= 1) {
         const resp = await fetch(`http://${etwg}/delete_user`, {
             method: "POST",
             body: JSON.stringify({
@@ -74,7 +79,7 @@ export async function GET() {
         response += await resp.text();
     }
 
-    if (ovKeys.length >= 1) {
+    if (config.openvpn && ovKeys.length >= 1) {
         const resp = await fetch(`http://${etov}/delete_user`, {
             method: "POST",
             body: JSON.stringify({
