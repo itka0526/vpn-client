@@ -124,7 +124,8 @@ const connect = new Menu<MyContext>("connect-menu", {})
             console.error(error);
             await ctx.api.sendMessage(
                 config.adminTelegramId,
-                reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `${error}`)
+                reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `${error}`),
+                { parse_mode: "HTML" }
             );
             return await ctx.editMessageText(connectText + "\n<b>🚫 Одоогоор түлхүүр үүсгэж болохгүй байна...</b>", { parse_mode: "HTML" });
         }
@@ -175,7 +176,8 @@ pmBot.command("start", async (ctx) => {
             reportIssueText(
                 ctx.message.from.username ? `@${ctx.message.from.username} [${ctx.message.from.id}]` : `Anonymous [${ctx.message.from.id}]`,
                 `${error}`
-            )
+            ),
+            { parse_mode: "HTML" }
         );
         await ctx.deleteMessages([loadingMessage.message_id]);
         return await ctx.reply("Бүртгэл амжилтгүй. ❌\n/start");
@@ -193,7 +195,8 @@ pmBot.on("msg:text", async (ctx) => {
             reportIssueText(
                 ctx.message.from.username ? `@${ctx.message.from.username} [${ctx.message.from.id}]` : `Anonymous [${ctx.message.from.id}]`,
                 ctx.message.text
-            )
+            ),
+            { parse_mode: "HTML" }
         );
     } catch (e) {
         console.error(e);

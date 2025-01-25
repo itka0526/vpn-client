@@ -121,7 +121,7 @@ https://apps.apple.com/us/app/hiddify-proxy-vpn/id6596777532
 `;
 
 export const reportIssueText = (userId: string, message: string) => `
-- User: <b>${userId}</b>
+- From: <b>${userId}</b>
 
-- Text: ${message}
+- Message: ${message}
 `;
