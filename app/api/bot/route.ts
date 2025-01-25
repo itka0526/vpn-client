@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 export const fetchCache = "force-no-store";
 
-import { Bot, InlineKeyboard, session, webhookCallback } from "grammy";
+import { Bot, session, webhookCallback } from "grammy";
 import prisma from "@/lib/db";
 import { randomBytes } from "crypto";
 import { Menu, MenuRange } from "@grammyjs/menu";
@@ -25,7 +25,6 @@ import { config } from "@/lib/config";
 import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL } from "./hiddify";
 import { MyContext } from "./types";
 import { extendByOneMonth, extendBySetDays } from "./helper";
-import { User } from "@prisma/client";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -229,9 +228,9 @@ pmBot.filter(
                 await ctx.reply(list);
             } else if (ctx.message.text.startsWith("/extend")) {
                 const rawMessage = ctx.message.text;
-                const [_, userEmail, days] = rawMessage.split(" ");
-
-                await extendBySetDays(userEmail, Number(days));
+                const [command, userEmail, days] = rawMessage.split(" ");
+                console.log(command);
+                days ? await extendBySetDays(userEmail, Number(days)) : await extendByOneMonth(userEmail);
                 await ctx.reply("ℹ️ Амжилттай");
             } else {
                 await ctx.reply(`
