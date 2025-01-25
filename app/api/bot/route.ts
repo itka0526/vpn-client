@@ -122,6 +122,10 @@ const connect = new Menu<MyContext>("connect-menu", {})
             );
         } catch (error) {
             console.error(error);
+            await ctx.api.sendMessage(
+                config.adminTelegramId,
+                reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `${error}`)
+            );
             return await ctx.editMessageText(connectText + "\n<b>🚫 Одоогоор түлхүүр үүсгэж болохгүй байна...</b>", { parse_mode: "HTML" });
         }
     })
@@ -166,6 +170,13 @@ pmBot.command("start", async (ctx) => {
         return await ctx.reply(mainText(newUser, true), { reply_markup: main, parse_mode: "HTML" });
     } catch (error) {
         console.error(error);
+        await ctx.api.sendMessage(
+            config.adminTelegramId,
+            reportIssueText(
+                ctx.message.from.username ? `@${ctx.message.from.username} [${ctx.message.from.id}]` : `Anonymous [${ctx.message.from.id}]`,
+                `${error}`
+            )
+        );
         await ctx.deleteMessages([loadingMessage.message_id]);
         return await ctx.reply("Бүртгэл амжилтгүй. ❌\n/start");
     }
