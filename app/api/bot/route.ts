@@ -160,7 +160,7 @@ pmBot.command("start", async (ctx) => {
         if (user) {
             ctx.session.keys = await prisma.key.findMany({ where: { userId: user.id }, select: { type: true, id: true, keyPath: true } });
             await ctx.deleteMessages([loadingMessage.message_id]);
-            return await ctx.reply(mainText(user), { reply_markup: main, parse_mode: "HTML" });
+            return await ctx.reply(mainText(user), { reply_markup: main, parse_mode: "HTML", link_preview_options: { is_disabled: true } });
         }
         // Else we create the user
         const password = `${randomBytes(5).toString("hex")}`;
