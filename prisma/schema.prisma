@@ -29,6 +29,7 @@ model Key {
   type      VPNType  @default(WireGuardVPN)
   keyPath   String   @default("")
   user      User     @relation(fields: [userId], references: [id])
+  region    Region   @default(unknown)
 }
 
 enum VPNType {
@@ -36,4 +37,10 @@ enum VPNType {
   OpenVPN
   OutlineVPN
   HiddifyVPN
+}
+
+enum Region {
+  unknown
+  mn
+  nl
 }
