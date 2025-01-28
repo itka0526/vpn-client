@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Agent } from "https";
 import prisma from "@/lib/db";
 import axios from "axios";
-import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL } from "../bot/hiddify";
+import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL, HiddifyKeyResponseType, removeHiddifyKeyDetails } from "../bot/hiddify";
 import { tgDomain } from "../bot/menu";
 
 export type KeyRouteRespType = { message: string } & (
@@ -139,4 +139,94 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
     } else {
         return NextResponse.json({ message: "Сервер дээр буруу тохируулго байна.", status: false });
     }
+}
+
+export async function DELETE(req: NextRequest): Promise<NextResponse<KeyRouteRespType>> {
+    const session = await getSession();
+    if (!session.userId) {
+        return NextResponse.json({ message: "Та эхлээд нэвтэрнэ үү.", status: false });
+    }
+    // Check if limit exceeded and if the user is banned
+    const dbRes = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { email: true, banned: true, activeTill: true, keys: true },
+    });
+    if (!dbRes) {
+        return NextResponse.json({ message: "Өгөгдлийн санд алдаа гарлаа.", status: false });
+    }
+    const { banned, activeTill } = dbRes;
+    if (activeTill < new Date()) {
+        return NextResponse.json({ message: "Та төлбөрөө төлнө үү.", status: false });
+    }
+    if (banned) {
+        return NextResponse.json({ message: "Таны хаяг блоклогдсон байна.", status: false });
+    }
+
+    const { searchParams } = new URL(req.url);
+
+    const rawKeyId = searchParams.get("keyId");
+
+    if (!rawKeyId) return NextResponse.json({ message: "Буруу 'Request Query' явуулсан байна. KeyId дутуу байна.", status: false });
+
+    const key = dbRes.keys.find(({ id }) => id === Number(rawKeyId));
+
+    if (!key) return NextResponse.json({ message: "Буруу 'Request Query' явуулсан байна. Хэрэглэгчид тийм түлхүүр алга.", status: false });
+
+    const etwg = process.env.WGIP,
+        wgpw = process.env.WGPW,
+        etov = process.env.OVIP,
+        ovpw = process.env.OVPW;
+
+    if (config.wireguard && (!etwg || !wgpw)) {
+        return NextResponse.json({ status: false, message: "Wireguard environment variables missing." });
+    }
+
+    if (config.openvpn && (!etov || !ovpw)) {
+        return NextResponse.json({ status: false, message: "OpenVPN environment variables missing." });
+    }
+
+    const vt: VPNType = key.type;
+
+    if (config.openvpn && vt === "OpenVPN") {
+        const resp = await fetch(`http://${etov}/delete_user`, {
+            method: "POST",
+            body: JSON.stringify({
+                creds: process.env.OVPW,
+                clientNames: [key.keyPath],
+            }),
+        });
+        if (resp.status !== 200) {
+            return NextResponse.json({ status: false, message: await resp.text() });
+        }
+    }
+    if (config.wireguard && vt === "WireGuardVPN") {
+        const resp = await fetch(`http://${etwg}/delete_user`, {
+            method: "POST",
+            body: JSON.stringify({
+                creds: process.env.WGPW,
+                clientNames: [key.keyPath],
+            }),
+        });
+        if (resp.status !== 200) {
+            return NextResponse.json({ status: false, message: await resp.text() });
+        }
+    }
+    if (config.outline && vt === "OutlineVPN") {
+        return NextResponse.json({ status: false, message: "TODO: Remove OutlineVPN key..." });
+    }
+    if (config.hiddify && vt === "HiddifyVPN") {
+        const keyData = JSON.parse(key.secret) as HiddifyKeyResponseType;
+        try {
+            await removeHiddifyKeyDetails(keyData.uuid);
+        } catch (error) {
+            console.error(error);
+            return NextResponse.json({ status: false, message: "Hiddify алдаа гарлаа." });
+        }
+    }
+    try {
+        await prisma.key.delete({ where: { id: key.id } });
+    } catch (error) {
+        return NextResponse.json({ status: false, message: `Түлхүүрийг сангаас устгаж чадсангүй.` });
+    }
+    return NextResponse.json({ message: `"${vt}"` + " түлхүүр амжилттай устлаа.", status: true, data: key });
 }

@@ -19,15 +19,20 @@ export function GenerateKey({
     const [loading, setLoading] = useState(false);
     const fetchKey = async () => {
         setLoading(true);
-        const resp = await fetch("/api/keys" + `?VPNType=${VPNType}`, { method: "POST" });
-        const res: KeyRouteRespType = await resp.json();
-        if (res.status) {
-            setState((prevState) => [...prevState, res.data]);
-            toast.success(res.message);
-        } else {
-            toast.error(res.message);
+        try {
+            const resp = await fetch("/api/keys" + `?VPNType=${VPNType}`, { method: "POST" });
+            const res: KeyRouteRespType = await resp.json();
+            if (res.status) {
+                setState((prevState) => [...prevState, res.data]);
+                toast.success(res.message);
+            } else {
+                toast.error(res.message);
+            }
+            setLoading(false);
+        } catch (err) {
+            toast.error("Алдаа гарлаа.");
+            return;
         }
-        setLoading(false);
     };
 
     return (

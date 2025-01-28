@@ -17,7 +17,7 @@ export function DashboardItemsHiddify({ userKeys, setUserKeys }: { userKeys: Key
             </section>
             <section className="grid grid-cols-1 gap-8 md:gap-4 md:p-4 w-full h-full">
                 {userKeys.filter(ff).map((item) => {
-                    return <LinkConfig key={`config-${item.id}`} config={item.keyPath} createdAt={item.createdAt} />;
+                    return <LinkConfig key={`config-${item.id}`} item={item} setUserKeys={setUserKeys} />;
                 })}
             </section>
         </>

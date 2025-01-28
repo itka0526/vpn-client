@@ -3,6 +3,7 @@ import { Key } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { HiddifyKeyResponseType, removeHiddifyKeyDetails } from "../bot/hiddify";
 import { config } from "@/lib/config";
+import { deleteKeysFromDB } from "@/lib/utils";
 
 export async function GET() {
     const res = await prisma.user.findMany({
@@ -33,15 +34,6 @@ export async function GET() {
         etov = process.env.OVIP,
         ovpw = process.env.OVPW;
 
-    const deleteKeysFromDB = async (keys: Key[]) =>
-        await prisma.key.deleteMany({
-            where: {
-                keyPath: {
-                    in: keys.map((x) => x.keyPath),
-                },
-            },
-        });
-
     if (config.wireguard && (!etwg || !wgpw)) {
         return NextResponse.json({ ok: false, message: "Wireguard environment variables missing." });
     }
@@ -70,7 +62,7 @@ export async function GET() {
             method: "POST",
             body: JSON.stringify({
                 creds: process.env.WGPW,
-                keys: wgKeys.map((k) => k.keyPath),
+                clientNames: wgKeys.map((k) => k.keyPath),
             }),
         });
         if (resp.status !== 200) {
