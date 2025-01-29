@@ -1,7 +1,7 @@
 import { config } from "@/lib/config";
 import { getSession } from "@/lib/session-server";
 import { AllVPNTypes, HiddifyKey, OutlineVPNRespType } from "@/lib/types";
-import { Key, VPNType } from "@prisma/client";
+import { Key, User, VPNType } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { Agent } from "https";
 import prisma from "@/lib/db";
@@ -18,6 +18,62 @@ export type KeyRouteRespType = { message: string } & (
           data: Key;
       }
 );
+
+export const createNewKeyWgOrOv = {
+    checkServerEnv: () => {
+        let etwg = process.env.WGIP,
+            wgpw = process.env.WGPW,
+            etov = process.env.OVIP,
+            ovpw = process.env.OVPW;
+
+        if (config.wireguard && (!etwg || !wgpw)) {
+            throw new Error("Wireguard environment variables missing.");
+        }
+        etwg = etwg as string;
+        wgpw = wgpw as string;
+
+        if (config.openvpn && (!etov || !ovpw)) {
+            throw new Error("OpenVPN environment variables missing.");
+        }
+        etov = etov as string;
+        ovpw = ovpw as string;
+
+        return { wgAddr: etwg, ovAddr: etov, wgCreds: wgpw, ovCreds: ovpw };
+    },
+    toRawServer: async (address: string, credentials: string) =>
+        await fetch(`http://${address}/create_new_user`, {
+            method: "POST",
+            body: JSON.stringify({ creds: credentials }),
+        }),
+    writeToDb: async (
+        data: string,
+        userIdentifier: User["email"] | number,
+        keyType: typeof VPNType.WireGuardVPN | typeof VPNType.OpenVPN
+    ): Promise<KeyRouteRespType> => {
+        if (data.startsWith("Success!")) {
+            const key = data.replace("Success! Output: ", "");
+            const [keyPath, keyConfig] = key.split("@#$");
+            try {
+                const genKey = await prisma.key.create({
+                    data:
+                        typeof userIdentifier === "string"
+                            ? {
+                                  secret: keyConfig,
+                                  user: { connect: { email: userIdentifier } },
+                                  keyPath: keyPath,
+                                  type: keyType as VPNType,
+                              }
+                            : { secret: keyConfig, userId: userIdentifier, keyPath: keyPath, type: keyType },
+                });
+                return { message: "Амжилттай.", status: true, data: genKey };
+            } catch (error) {
+                return { message: "Database сервер ажилахгүй байна.", status: false };
+            }
+        } else {
+            return { message: "VPN сервер ажилахгүй байна.", status: false };
+        }
+    },
+};
 
 export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespType>> {
     const session = await getSession();
@@ -48,96 +104,92 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
     if (!validatedVPNType.success) {
         return NextResponse.json({ message: "Буруу 'Request Query' явуулсан байна.", status: false });
     }
-    const vt: VPNType = validatedVPNType.data;
-    let resp: Response;
 
-    switch (vt) {
-        case "OpenVPN":
-            resp = await fetch(`http://${process.env.OVIP}/create_new_user`, {
-                method: "POST",
-                body: JSON.stringify({ creds: process.env.OVPW }),
-            });
-            break;
-        case "WireGuardVPN":
-            resp = await fetch(`http://${process.env.WGIP}/create_new_user`, {
-                method: "POST",
-                body: JSON.stringify({ creds: process.env.WGPW }),
-            });
-            break;
-        case "OutlineVPN":
-            const axiosResp = await axios.post(`${process.env.OUTLINE_API}/access-keys`, null, {
-                httpsAgent: new Agent({
-                    rejectUnauthorized: false,
-                }),
-            });
-            if (axiosResp.statusText !== "Created") {
+    try {
+        const { ovAddr, ovCreds, wgAddr, wgCreds } = createNewKeyWgOrOv.checkServerEnv();
+
+        const vt: VPNType = validatedVPNType.data;
+        let resp: Response;
+
+        switch (vt) {
+            case config.openvpn && "OpenVPN":
+                resp = await createNewKeyWgOrOv.toRawServer(ovAddr, ovCreds);
+                break;
+            case config.wireguard && "WireGuardVPN":
+                resp = await createNewKeyWgOrOv.toRawServer(wgAddr, wgCreds);
+                break;
+            case config.outline && "OutlineVPN":
+                const axiosResp = await axios.post(`${process.env.OUTLINE_API}/access-keys`, null, {
+                    httpsAgent: new Agent({
+                        rejectUnauthorized: false,
+                    }),
+                });
+                if (axiosResp.statusText !== "Created") {
+                    return NextResponse.json({ message: "Серверийг буруу тохируулсан байна.", status: false });
+                }
+                resp = new Response(JSON.stringify(axiosResp.data), { headers: { "Content-Type": "application/json" } });
+                break;
+            case config.hiddify && "HiddifyVPN":
+                let tgId = 0;
+                if (dbRes.email.endsWith(tgDomain) && /^-?\d+$/.test(dbRes.email.split("@")[0])) tgId = parseInt(dbRes.email.split("@")[0]);
+                const hiddifyKey = await createHiddifyKey(tgId, `key_${tgId ?? dbRes.email.split("@")[0]}_${_count.keys}`);
+                resp = new Response(JSON.stringify(hiddifyKey), { headers: { "Content-Type": "application/json" } });
+                break;
+            default:
                 return NextResponse.json({ message: "Серверийг буруу тохируулсан байна.", status: false });
-            }
-            resp = new Response(JSON.stringify(axiosResp.data), { headers: { "Content-Type": "application/json" } });
-            break;
-        case "HiddifyVPN":
-            let tgId = 0;
-            if (dbRes.email.endsWith(tgDomain) && /^-?\d+$/.test(dbRes.email.split("@")[0])) tgId = parseInt(dbRes.email.split("@")[0]);
-            const hiddifyKey = await createHiddifyKey(tgId, `key_${tgId ?? dbRes.email.split("@")[0]}_${_count.keys}`);
-            resp = new Response(JSON.stringify(hiddifyKey), { headers: { "Content-Type": "application/json" } });
-            break;
-        default:
-            return NextResponse.json({ message: "Серверийг буруу тохируулсан байна.", status: false });
-    }
+        }
 
-    if (vt === "HiddifyVPN") {
-        try {
-            const data = await resp.json();
-            const res = HiddifyKey.safeParse(data);
-            if (!res.success) {
-                console.log(res.error);
-                return NextResponse.json({ message: "Hiddify сервер буруу өгөгдөл буцаалаа.", status: false });
-            }
-            const { data: key } = res;
-            const genKey = await prisma.key.create({
-                data: {
-                    userId: session.userId,
-                    type: "HiddifyVPN",
-                    keyPath: HIDDIFY_API_USER_BASE_URL.toString() + `/${key.uuid}`,
-                    secret: JSON.stringify(key),
-                },
-            });
-            return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
-        } catch (error) {
-            return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });
-        }
-    } else if (vt === "OutlineVPN") {
-        // Handle outline vpn
-        const data = await resp.json();
-        const res = OutlineVPNRespType.safeParse(data);
-
-        if (!res.success) {
-            return NextResponse.json({ message: "Outline сервер буруу өгөгдөл буцаалаа.", status: false });
-        }
-        const { accessUrl, id } = res.data;
-        try {
-            const genKey = await prisma.key.create({ data: { secret: accessUrl, userId: session.userId, keyPath: id, type: vt } });
-            return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
-        } catch (error) {
-            return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });
-        }
-    } else if (vt === "OpenVPN" || vt === "WireGuardVPN") {
-        // Handle wireguard and ovpn
-        const data = await resp.text();
-        if (data.startsWith("Success!")) {
-            const key = data.replace("Success! Output: ", "");
-            const [keyPath, keyConfig] = key.split("@#$");
+        if (vt === "HiddifyVPN") {
             try {
-                const genKey = await prisma.key.create({ data: { secret: keyConfig, userId: session.userId, keyPath: keyPath, type: vt } });
+                const data = await resp.json();
+                const res = HiddifyKey.safeParse(data);
+                if (!res.success) {
+                    console.log(res.error);
+                    return NextResponse.json({ message: "Hiddify сервер буруу өгөгдөл буцаалаа.", status: false });
+                }
+                const { data: key } = res;
+                const genKey = await prisma.key.create({
+                    data: {
+                        userId: session.userId,
+                        type: "HiddifyVPN",
+                        keyPath: HIDDIFY_API_USER_BASE_URL.toString() + `/${key.uuid}`,
+                        secret: JSON.stringify(key),
+                    },
+                });
                 return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
             } catch (error) {
                 return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });
             }
+        } else if (vt === "OutlineVPN") {
+            // Handle outline vpn
+            const data = await resp.json();
+            const res = OutlineVPNRespType.safeParse(data);
+
+            if (!res.success) {
+                return NextResponse.json({ message: "Outline сервер буруу өгөгдөл буцаалаа.", status: false });
+            }
+            const { accessUrl, id } = res.data;
+            try {
+                const genKey = await prisma.key.create({ data: { secret: accessUrl, userId: session.userId, keyPath: id, type: vt } });
+                return NextResponse.json({ message: "Амжилттай.", status: true, data: genKey });
+            } catch (error) {
+                return NextResponse.json({ message: "Database сервер ажилахгүй байна.", status: false });
+            }
+        } else if (vt === "OpenVPN" || vt === "WireGuardVPN") {
+            // Handle wireguard and ovpn
+            const data = await resp.text();
+            return NextResponse.json(await createNewKeyWgOrOv.writeToDb(data, session.userId, vt));
         } else {
-            return NextResponse.json({ message: "VPN сервер ажилахгүй байна.", status: false });
+            return NextResponse.json({ message: "Сервер дээр буруу тохируулго байна.", status: false });
         }
-    } else {
-        return NextResponse.json({ message: "Сервер дээр буруу тохируулго байна.", status: false });
+    } catch (error) {
+        console.error(error);
+        switch (error) {
+            case Error:
+                return NextResponse.json({ status: false, message: `${error}` });
+            default:
+                return NextResponse.json({ status: false, message: `Алдаа гарлаа.` });
+        }
     }
 }
 

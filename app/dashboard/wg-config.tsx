@@ -3,15 +3,34 @@
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Copy, LucideQrCode, XIcon } from "lucide-react";
+import { Check, Copy, LucideQrCode, Trash2, XIcon } from "lucide-react";
 import { useState } from "react";
 import QRCode from "react-qr-code";
 import { useCopy } from "./copy";
+import { KeyRouteRespType } from "../api/keys/route";
+import toast from "react-hot-toast";
+import { ConfigItemProps } from "@/lib/types";
 
-export function WgConfig({ config }: { config: string }) {
+export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigItemProps) {
     const [open, setOpen] = useState(false);
     const { copied, copyToClipboard } = useCopy();
 
+    const [deletingKey, setDeletingKey] = useState(false);
+
+    const deleteKey = async () => {
+        setDeletingKey(!deletingKey);
+        const resp = await fetch("/api/keys" + `?keyId=${id}`, { method: "DELETE" });
+        const res: KeyRouteRespType = await resp.json();
+        if (res.status) {
+            toast.success(res.message);
+            setUserKeys((prev) => {
+                return prev.filter((other) => other.id !== id);
+            });
+        } else {
+            toast.error(res.message);
+        }
+        setDeletingKey(false);
+    };
     return (
         <>
             {open && (
@@ -35,6 +54,9 @@ export function WgConfig({ config }: { config: string }) {
                     placeholder="Nothing..."
                 />
                 <div className="flex gap-4">
+                    <Button onClick={() => deleteKey()} disabled={deletingKey}>
+                        <Trash2 />
+                    </Button>
                     <Button onClick={() => setOpen(true)}>
                         <LucideQrCode />
                     </Button>

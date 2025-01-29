@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Check, Copy, ExternalLink, Loader2, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Link from "next/link";
-import { Dispatch, SetStateAction, useState } from "react";
-import { Key } from "@prisma/client";
+import { useState } from "react";
 import { KeyRouteRespType } from "../api/keys/route";
 import toast from "react-hot-toast";
+import { ConfigItemProps } from "@/lib/types";
 
-export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKeys }: { item: Key; setUserKeys: Dispatch<SetStateAction<Key[]>> }) {
+export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKeys }: ConfigItemProps) {
     const { copied, copyToClipboard } = useCopy();
     const formattedDate = createdAt.toLocaleDateString
         ? createdAt.toLocaleDateString("mn-MN", {

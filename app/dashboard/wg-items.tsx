@@ -17,7 +17,7 @@ export function DashboardItemsWireguard({ userKeys, setUserKeys }: { userKeys: K
             </section>
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 md:p-4 w-full h-full">
                 {userKeys.filter(ff).map((item) => {
-                    return <WgConfig key={`config-${item.id}`} config={item.secret} />;
+                    return <WgConfig key={`config-${item.id}`} item={item} setUserKeys={setUserKeys} />;
                 })}
             </section>
         </>

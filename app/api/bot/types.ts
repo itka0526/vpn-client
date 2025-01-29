@@ -3,13 +3,13 @@ import { Context, SessionFlavor } from "grammy";
 
 type MinKey = {
     id: Key["id"];
-    type: Key["type"] | "WORKAROUND";
+    type: Key["type"];
     keyPath: Key["keyPath"];
 };
 
 interface SessionData {
     keys: Array<MinKey>;
-    viewKeyId: MinKey["id"];
+    wireguardLastKeyId: MinKey["id"];
 }
 
 type MyContext = Context & SessionFlavor<SessionData>;

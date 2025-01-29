@@ -1,7 +1,7 @@
 import path from "path";
 
 export const config = {
-    deviceLimitPerAcc: 5,
+    deviceLimitPerAcc: 7,
     phone: "+7 (977) 104 11-42",
     mail: "itka0526@gmail.com",
     github: "https://github.com/itka0526/",

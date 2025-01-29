@@ -1,8 +1,9 @@
 import { typeToFlattenedError, z, ZodType } from "zod";
 
-import { User, VPNType } from "@prisma/client";
+import { Key, User, VPNType } from "@prisma/client";
 import { SessionOptions } from "iron-session";
 import { HiddifyKeyResponseType } from "@/app/api/bot/hiddify";
+import { Dispatch, SetStateAction } from "react";
 
 export const HiddifyKey = z.object({
     added_by_uuid: z.string(),
@@ -92,3 +93,5 @@ export const OutlineVPNRespType = z.object({
     method: z.string(),
     accessUrl: z.string(),
 }) satisfies ZodType<OutlineVPNResponse>;
+
+export type ConfigItemProps = { item: Key; setUserKeys: Dispatch<SetStateAction<Key[]>> };

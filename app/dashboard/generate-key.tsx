@@ -28,11 +28,11 @@ export function GenerateKey({
             } else {
                 toast.error(res.message);
             }
-            setLoading(false);
         } catch (err) {
             toast.error("Алдаа гарлаа.");
             return;
         }
+        setLoading(false);
     };
 
     return (
