@@ -186,7 +186,7 @@ export const desktopInstructionsTextWireguard = `
 `;
 
 export const wireguarConfigText = `
-⚙️ ТОХИРГОО
+⚙️ <b>ТОХИРГОО</b>
 
 🟩 QR код уншуулах нь хамгийн хялбар арга.
    WireGuard аппаа нээгээд "QR Scan" дээр дарна уу.
