@@ -188,7 +188,7 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
 
 const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟢 QR код", async (ctx) => {
-        await ctx.reply("<b>⏳ Шинэ түлхүүр үүсгэж байна...</b>", { parse_mode: "HTML" });
+        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
 
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
@@ -231,7 +231,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     })
     .row()
     .text("🟡 .conf файл", async (ctx) => {
-        await ctx.reply("<b>⏳ Шинэ түлхүүр үүсгэж байна...</b>", { parse_mode: "HTML" });
+        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
 
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
@@ -269,7 +269,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     })
     .row()
     .text("🔴 Хуулах", async (ctx) => {
-        await ctx.reply("<b>⏳ Шинэ түлхүүр үүсгэж байна...</b>", { parse_mode: "HTML" });
+        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
 
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
