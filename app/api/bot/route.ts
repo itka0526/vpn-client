@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 export const fetchCache = "force-no-store";
 
-import { Bot, InputFile, InputMediaBuilder, session, webhookCallback } from "grammy";
+import { Bot, InputFile, session, webhookCallback } from "grammy";
 import prisma from "@/lib/db";
 import { Menu, MenuRange } from "@grammyjs/menu";
 import {
