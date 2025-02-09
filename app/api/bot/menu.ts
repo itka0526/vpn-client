@@ -216,3 +216,16 @@ export const askText = `📍 Та бот руу шууд хүсэлтээ бич
 export const usersList = (users: Partial<User>[]) => `
 ${users.map((u) => `${u.email}` + "\n")}
 `;
+
+export const adminCommands = `
+Командууд:
+
+# Хэрэглэгчидийн нэрсийн жагсалт
+/users
+
+# Сунгах - extend userEmail dayToAdd
+/extend
+
+# Хэрэглэгч - userEmail
+/user
+`;

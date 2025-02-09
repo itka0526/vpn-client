@@ -6,6 +6,7 @@ import { Bot, InputFile, session, webhookCallback } from "grammy";
 import prisma from "@/lib/db";
 import { Menu, MenuRange } from "@grammyjs/menu";
 import {
+    adminCommands,
     androidInstructionsTextHiddify,
     askText,
     connectTextHiddify,
@@ -61,6 +62,7 @@ const main = new Menu<MyContext>("main-menu")
             await ctx.reply(askText, {
                 parse_mode: "HTML",
                 link_preview_options: { prefer_large_media: true },
+                disable_notification: true,
             })
     )
     .row();
@@ -165,6 +167,7 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
                         await ctx.editMessageText(wireguarConfigText, { parse_mode: "HTML" });
                     } catch (error) {
                         await ctx.editMessageText(wireguarConfigText + "<b>⏳ Дахин оролдоно уу...</b>", { parse_mode: "HTML" });
+                        ctx.menu.back();
                     }
                 })
                 .row();
@@ -281,6 +284,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu", { onMen
 
                     await ctx.replyWithDocument(confFile, {
                         parse_mode: "HTML",
+                        disable_notification: true,
                     });
                 } catch (error) {
                     console.error(error);
@@ -329,6 +333,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu", { onMen
     })
     .back("WireGuard холбох цэс руу буцах ⬅️", async (ctx) => {
         try {
+            await deleteMoreRecentMessages(ctx);
             await ctx.editMessageText(connectTextWireguard, { parse_mode: "HTML" });
         } catch (error) {
             console.error(error);
@@ -399,12 +404,12 @@ main.register(payment);
 pmBot.use(main);
 
 pmBot.command("start", async (ctx) => {
-    const loadingMessage = await ctx.reply("Уншиж байна... 🔄", { parse_mode: "HTML" });
+    const loadingMessage = await ctx.reply("Уншиж байна... 🔄", { parse_mode: "HTML", disable_notification: true });
     const generatedEmail = `${ctx.from.id}${tgDomain}`;
 
     try {
         // If the user is already registered
-        const searchingUser = await ctx.reply("Хэрэглэгчийг хайж байна... 🧑‍💻");
+        const searchingUser = await ctx.reply("Хэрэглэгчийг хайж байна... 🧑‍💻", { disable_notification: true });
         const user = await prisma.user.findUnique({
             where: { email: generatedEmail },
         });
@@ -417,6 +422,7 @@ pmBot.command("start", async (ctx) => {
                 reply_markup: main,
                 parse_mode: "HTML",
                 link_preview_options: { show_above_text: true, prefer_small_media: true },
+                disable_notification: true,
             });
         }
         // Else we create the user
@@ -425,7 +431,7 @@ pmBot.command("start", async (ctx) => {
         const newUser = await prisma.user.create({ data: { email: generatedEmail, password: password } });
         await ctx.deleteMessages([registeringUser.message_id, loadingMessage.message_id]);
         // Respond back to the user
-        return await ctx.reply(mainText(newUser, true), { reply_markup: main, parse_mode: "HTML" });
+        return await ctx.reply(mainText(newUser, true), { reply_markup: main, parse_mode: "HTML", disable_notification: true });
     } catch (error) {
         console.error(error);
         await ctx.api.sendMessage(
@@ -457,20 +463,17 @@ pmBot.filter(
                 await ctx.reply(list);
             } else if (ctx.message.text.startsWith("/extend")) {
                 const rawMessage = ctx.message.text;
-                const [command, userEmail, days] = rawMessage.split(" ");
-                console.log(command);
+                const [userEmail, days] = rawMessage.split(" ").slice(1);
                 days ? await extendBySetDays(userEmail, Number(days)) : await extendByOneMonth(userEmail);
                 await ctx.reply("ℹ️ Амжилттай");
+            } else if (ctx.message.text.startsWith("/extend")) {
+                const rawMessage = ctx.message.text;
+                const [userEmail] = rawMessage.split(" ").slice(1);
+                const user = await prisma.user.findUnique({ where: { email: userEmail } });
+                if (!user) return await ctx.reply(`ℹ️ Хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
+                await ctx.reply(`<code>${JSON.stringify(user, null, 2)}</code>`, { parse_mode: "HTML" });
             } else {
-                await ctx.reply(`
-Командууд:
-
-# Хэрэглэгчидийн нэрсийн жагсалт
-/users
-
-# Сунгах - extend userEmail dayToAdd
-/extend
-            `);
+                await ctx.reply(adminCommands, { parse_mode: "HTML" });
             }
         }
     }
