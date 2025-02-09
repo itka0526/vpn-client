@@ -190,8 +190,10 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟢 QR код", async (ctx) => {
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
+        await ctx.answerCallbackQuery();
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Түлхүүрийг шалгаж байна...</b>", { parse_mode: "HTML" });
             if (!key) {
                 await ctx.api.sendMessage(
                     config.adminTelegramId,
@@ -200,6 +202,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 );
                 return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
             }
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", { parse_mode: "HTML" });
             const qrBuffer = await QRCode.toBuffer(key.secret, {
                 errorCorrectionLevel: "H",
                 type: "png",
@@ -228,6 +231,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟡 .conf файл", async (ctx) => {
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
+        await ctx.answerCallbackQuery();
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
             if (!key) {
@@ -307,7 +311,9 @@ const payment = new Menu<MyContext>("payment-menu")
         await userCtx.api.sendMessage(
             config.adminTelegramId,
             iPaidMessage(
-                userCtx.from.username ? `@${userCtx.from.username} [${userCtx.from.id}]` : `Anonymous [${userCtx.from.id}]`,
+                userCtx.from.username
+                    ? `@${userCtx.from.username} [<code>${userCtx.from.id}${tgDomain}</code>]`
+                    : `Anonymous [<code>${userCtx.from.id}${tgDomain}</code>]`,
                 `Хэрэглэгч төлбөр төллөө... (${new Date().toLocaleString()})`
             ),
             { parse_mode: "HTML" }
