@@ -189,7 +189,7 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
 
 const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟢 QR код", async (ctx) => {
-        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+        await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
 
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
@@ -217,8 +217,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 },
             });
             const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
-            const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Уншиж байна...</b>", { parse_mode: "HTML" });
-            await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
+
             return await ctx.replyWithPhoto(qrInputFile, {
                 parse_mode: "HTML",
                 show_caption_above_media: true,
@@ -236,7 +235,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     })
     .row()
     .text("🟡 .conf файл", async (ctx) => {
-        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+        await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
 
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
@@ -253,8 +252,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
             }
             const confBuffer = Buffer.from(key.secret, "utf-8");
             const confFile = new InputFile(Uint8Array.from(confBuffer), `wg-cfg-${key.userId}.conf`);
-            const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Уншиж байна...</b>", { parse_mode: "HTML" });
-            await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
+
             return await ctx.replyWithDocument(confFile, {
                 parse_mode: "HTML",
                 caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
@@ -290,7 +288,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
             }
             const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Уншиж байна...</b>", { parse_mode: "HTML" });
             await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
-            return await ctx.reply(wireguarConfigText + `\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
+            return await ctx.reply(`\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(
