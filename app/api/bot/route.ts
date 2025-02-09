@@ -190,7 +190,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟢 QR код", async (ctx) => {
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-        await ctx.answerCallbackQuery();
+        await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
             await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Түлхүүрийг шалгаж байна...</b>", { parse_mode: "HTML" });
@@ -202,7 +202,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 );
                 return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
             }
-            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", { parse_mode: "HTML" });
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна (1/2)...</b>", { parse_mode: "HTML" });
             const qrBuffer = await QRCode.toBuffer(key.secret, {
                 errorCorrectionLevel: "H",
                 type: "png",
@@ -213,6 +213,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                     light: "#FFFFFF",
                 },
             });
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна (2/2)...</b>", { parse_mode: "HTML" });
             const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
             return await ctx.editMessageMedia(
                 InputMediaBuilder.photo(qrInputFile, { parse_mode: "HTML", show_caption_above_media: true, caption: "🎊 QR код амжилттай үүсгэсэн!" })
@@ -231,9 +232,10 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟡 .conf файл", async (ctx) => {
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-        await ctx.answerCallbackQuery();
+        await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Түлхүүрийг шалгаж байна...</b>", { parse_mode: "HTML" });
             if (!key) {
                 await ctx.api.sendMessage(
                     config.adminTelegramId,
@@ -242,7 +244,9 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 );
                 return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
             }
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Файл үүсгэж байна (1/2)...</b>", { parse_mode: "HTML" });
             const qrBuffer = Buffer.from(key.secret, "utf-8");
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Файл үүсгэж байна (2/2)...</b>", { parse_mode: "HTML" });
             const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), `wg-cfg-${key.userId}.conf`);
             return await ctx.editMessageMedia(
                 InputMediaBuilder.document(qrInputFile, {
@@ -269,6 +273,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
+            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Түлхүүрийг шалгаж байна...</b>", { parse_mode: "HTML" });
             if (!key) {
                 await ctx.api.sendMessage(
                     config.adminTelegramId,
@@ -289,7 +294,22 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
         }
     })
     .row()
-    .back("WireGuard холбох цэс руу буцах ⬅️", async (ctx) => await ctx.editMessageText(connectTextWireguard, { parse_mode: "HTML" }));
+    .back("WireGuard холбох цэс руу буцах ⬅️", async (ctx) => {
+        try {
+            return await ctx.editMessageText(connectTextWireguard, { parse_mode: "HTML" });
+        } catch (error) {
+            await ctx.api.sendMessage(
+                config.adminTelegramId,
+                reportIssueText(
+                    ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`,
+                    `Wireguard буцах боломжгүй байна...`
+                ),
+                { parse_mode: "HTML" }
+            );
+            ctx.menu.nav("connect-menu-wireguard");
+            return await ctx.reply("🚫 Тохиргоо үүсгэхэд алдаа гарлаа. Та дахин оролдоно уу.", { parse_mode: "HTML" });
+        }
+    });
 
 const connectWrapper = new Menu<MyContext>("connect-wrapper")
     .submenu(
