@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 export const fetchCache = "force-no-store";
 
-import { Bot, InputFile, session, webhookCallback } from "grammy";
+import { Bot, InputFile, InputMediaBuilder, session, webhookCallback } from "grammy";
 import prisma from "@/lib/db";
 import { Menu, MenuRange } from "@grammyjs/menu";
 import {
@@ -29,7 +29,7 @@ import {
 import { config } from "@/lib/config";
 import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL } from "./hiddify";
 import { MyContext } from "./types";
-import { checkUser, extendByOneMonth, extendBySetDays, generateRandomString, getAllKeys } from "./helper";
+import { checkUser, extendByOneMonth, extendBySetDays, generateRandomString, getAllKeys, retrieveLastAccessedKey } from "./helper";
 import { VPNType } from "@prisma/client";
 import { createNewKeyWgOrOv } from "../keys/route";
 import QRCode from "qrcode";
@@ -141,9 +141,23 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
             const displayName = `WireGuard түлхүүр (${vpnType.toString()}) ${i + 1} 🗝️`;
             range
                 .submenu(displayName, "wireguard-config-menu", async (ctx) => {
-                    ctx.session.wireguardLastKeyId = keys[i].id;
-                    await ctx.editMessageText(wireguarConfigText, { parse_mode: "HTML" });
-                    await ctx.reply("🟥🟩🟦⬛️⬜️🟥🟩🟦⬛️⬜️🟥🟩🟦⬛️⬜️");
+                    try {
+                        await prisma.lastAccessedKey.upsert({
+                            // If lastAccessedKey does not exist create one
+                            create: {
+                                userEmail: `${ctx.from.id}${tgDomain}`,
+                                keyId: keys[i].id,
+                            },
+                            // Update the key
+                            where: { userEmail: `${ctx.from.id}${tgDomain}` },
+                            update: {
+                                keyId: keys[i].id,
+                            },
+                        });
+                        await ctx.editMessageText(wireguarConfigText, { parse_mode: "HTML" });
+                    } catch (error) {
+                        await ctx.editMessageText(wireguarConfigText + "<b>⏳ Дахин оролдоно уу...</b>", { parse_mode: "HTML" });
+                    }
                 })
                 .row();
         }
@@ -190,21 +204,8 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
 const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟢 QR код", async (ctx) => {
         await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-
-        const keyId = ctx.session.wireguardLastKeyId;
-        if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-
         try {
-            const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
-            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Түлхүүрийг шалгаж байна...</b>", { parse_mode: "HTML" });
-            if (!key) {
-                await ctx.api.sendMessage(
-                    config.adminTelegramId,
-                    reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `Түлхүүр алга...`),
-                    { parse_mode: "HTML" }
-                );
-                return await ctx.reply(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-            }
+            const key = await retrieveLastAccessedKey(ctx);
             await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", { parse_mode: "HTML" });
             const qrBuffer = await QRCode.toBuffer(key.secret, {
                 errorCorrectionLevel: "H",
@@ -217,19 +218,13 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 },
             });
             const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
-
-            if (ctx.session.wgLastMsgId) {
-                await ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                ctx.session.wgLastMsgId = undefined;
-            }
-
-            const { message_id } = await ctx.replyWithPhoto(qrInputFile, {
-                parse_mode: "HTML",
-                show_caption_above_media: true,
-                caption: "🎊 QR код амжилттай үүсгэсэн!",
-            });
-
-            ctx.session.wgLastMsgId = message_id;
+            return await ctx.editMessageMedia(
+                InputMediaBuilder.photo(qrInputFile, {
+                    parse_mode: "HTML",
+                    show_caption_above_media: true,
+                    caption: "🎊 QR код амжилттай үүсгэсэн!",
+                })
+            );
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(
@@ -243,34 +238,16 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .row()
     .text("🟡 .conf файл", async (ctx) => {
         await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-
-        const keyId = ctx.session.wireguardLastKeyId;
-        if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-
         try {
-            const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
-            if (!key) {
-                await ctx.api.sendMessage(
-                    config.adminTelegramId,
-                    reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `Түлхүүр алга...`),
-                    { parse_mode: "HTML" }
-                );
-                return await ctx.reply(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-            }
+            const key = await retrieveLastAccessedKey(ctx);
             const confBuffer = Buffer.from(key.secret, "utf-8");
             const confFile = new InputFile(Uint8Array.from(confBuffer), `wg-cfg-${key.userId}.conf`);
-
-            if (ctx.session.wgLastMsgId) {
-                await ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                ctx.session.wgLastMsgId = undefined;
-            }
-
-            const { message_id } = await ctx.replyWithDocument(confFile, {
-                parse_mode: "HTML",
-                caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
-            });
-
-            ctx.session.wgLastMsgId = message_id;
+            return await ctx.editMessageMedia(
+                InputMediaBuilder.document(confFile, {
+                    parse_mode: "HTML",
+                    caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
+                })
+            );
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(
@@ -287,27 +264,9 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .row()
     .text("🔴 Хуулах", async (ctx) => {
         await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-
-        const keyId = ctx.session.wireguardLastKeyId;
-        if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
         try {
-            const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
-            if (!key) {
-                await ctx.api.sendMessage(
-                    config.adminTelegramId,
-                    reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `Түлхүүр алга...`),
-                    { parse_mode: "HTML" }
-                );
-                return await ctx.reply(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-            }
-
-            if (ctx.session.wgLastMsgId) {
-                await ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                ctx.session.wgLastMsgId = undefined;
-            }
-
-            const { message_id } = await ctx.reply(`\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
-            ctx.session.wgLastMsgId = message_id;
+            const key = await retrieveLastAccessedKey(ctx);
+            return await ctx.editMessageText(wireguarConfigText + `\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(

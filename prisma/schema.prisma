@@ -9,27 +9,38 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  activeTill DateTime @default(dbgenerated("(now() + '14 days'::interval)")) @db.Date
-  banned     Boolean  @default(false)
-  keys       Key[]
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  password        String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  activeTill      DateTime          @default(dbgenerated("(now() + '14 days'::interval)")) @db.Date
+  banned          Boolean           @default(false)
+  keys            Key[]
+  LastAccessedKey LastAccessedKey[]
 
   @@index([email])
 }
 
 model Key {
-  id        Int      @id @default(autoincrement())
-  secret    String
-  userId    Int
-  createdAt DateTime @default(now())
-  type      VPNType  @default(WireGuardVPN)
-  keyPath   String   @default("")
-  user      User     @relation(fields: [userId], references: [id])
-  region    Region   @default(unknown)
+  id              Int               @id @default(autoincrement())
+  secret          String
+  userId          Int
+  createdAt       DateTime          @default(now())
+  type            VPNType           @default(WireGuardVPN)
+  keyPath         String            @default("")
+  user            User              @relation(fields: [userId], references: [id])
+  region          Region            @default(unknown)
+  LastAccessedKey LastAccessedKey[]
+}
+
+model LastAccessedKey {
+  id        Int    @id @default(autoincrement())
+  userEmail String @unique
+  keyId     Int    @unique
+
+  user User @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  key  Key  @relation(fields: [keyId], references: [id], onDelete: Cascade)
 }
 
 enum VPNType {

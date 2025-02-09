@@ -90,3 +90,16 @@ export const getAllKeys = async (ctx: MyContext & MenuFlavor, prefixText: typeof
         });
     }
 };
+
+export const retrieveLastAccessedKey = async (ctx: MyContext & MenuFlavor) => {
+    const res = await prisma.lastAccessedKey.findUnique({
+        where: { userEmail: `${ctx?.from?.id}${tgDomain}` },
+        select: { key: true },
+    });
+    if (!res) {
+        // Navigate back
+        ctx.menu.back();
+        throw new Error("Түлхүүр олдсонгүй...");
+    }
+    return res.key;
+};
