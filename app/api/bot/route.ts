@@ -73,13 +73,13 @@ const connectHiddify = new Menu<MyContext>("connect-menu-hiddify", {})
         if (!ctx.from) return;
         const keys = ctx.session.keys.filter(({ type }) => type === VPNType.HiddifyVPN);
         const range = new MenuRange<MyContext>();
-        if (keys.length >= 1) range.text("------------------------").row();
+        if (keys.length >= 1) range.text("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖").row();
         for (let i = 0; i < keys.length; i++) {
             const vpnType = keys[i].type;
             const displayName = `Hiddify түлхүүр (${vpnType.toString()}) ${i + 1} 🗝️`;
             range.copyText(displayName, keys[i].keyPath).row();
         }
-        if (keys.length >= 1) range.text("------------------------").row();
+        if (keys.length >= 1) range.text("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖").row();
         return range;
     })
     .text("Түлхүүр үүсгэх 🔑", async (ctx) => {
@@ -135,7 +135,7 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
         if (!ctx.from) return;
         const keys = ctx.session.keys.filter(({ type }) => type === VPNType.WireGuardVPN);
         const range = new MenuRange<MyContext>();
-        if (keys.length >= 1) range.text("------------------------").row();
+        if (keys.length >= 1) range.text("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖").row();
         for (let i = 0; i < keys.length; i++) {
             const vpnType = keys[i].type;
             const displayName = `WireGuard түлхүүр (${vpnType.toString()}) ${i + 1} 🗝️`;
@@ -143,10 +143,11 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
                 .submenu(displayName, "wireguard-config-menu", async (ctx) => {
                     ctx.session.wireguardLastKeyId = keys[i].id;
                     await ctx.editMessageText(wireguarConfigText, { parse_mode: "HTML" });
+                    await ctx.reply("🟥🟩🟦⬛️⬜️🟥🟩🟦⬛️⬜️🟥🟩🟦⬛️⬜️");
                 })
                 .row();
         }
-        if (keys.length >= 1) range.text("------------------------").row();
+        if (keys.length >= 1) range.text("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖").row();
         return range;
     })
     .text("Түлхүүр үүсгэх 🔑", async (ctx) => {
@@ -188,13 +189,10 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
 
 const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟢 QR код", async (ctx) => {
+        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-
-        const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-        await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
-
-        ctx.menu.nav("wireguard-config-menu");
 
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
@@ -205,7 +203,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                     reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `Түлхүүр алга...`),
                     { parse_mode: "HTML" }
                 );
-                return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
+                return await ctx.reply(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
             }
             await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", { parse_mode: "HTML" });
             const qrBuffer = await QRCode.toBuffer(key.secret, {
@@ -219,9 +217,13 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 },
             });
             const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
-            return await ctx.editMessageMedia(
-                InputMediaBuilder.photo(qrInputFile, { parse_mode: "HTML", show_caption_above_media: true, caption: "🎊 QR код амжилттай үүсгэсэн!" })
-            );
+            const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Уншиж байна...</b>", { parse_mode: "HTML" });
+            await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
+            return await ctx.replyWithPhoto(qrInputFile, {
+                parse_mode: "HTML",
+                show_caption_above_media: true,
+                caption: "🎊 QR код амжилттай үүсгэсэн!",
+            });
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(
@@ -234,13 +236,10 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     })
     .row()
     .text("🟡 .conf файл", async (ctx) => {
+        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
-
-        const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-        await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
-
-        ctx.menu.nav("wireguard-config-menu");
 
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
@@ -250,16 +249,16 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                     reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `Түлхүүр алга...`),
                     { parse_mode: "HTML" }
                 );
-                return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
+                return await ctx.reply(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
             }
-            const qrBuffer = Buffer.from(key.secret, "utf-8");
-            const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), `wg-cfg-${key.userId}.conf`);
-            return await ctx.editMessageMedia(
-                InputMediaBuilder.document(qrInputFile, {
-                    parse_mode: "HTML",
-                    caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
-                })
-            );
+            const confBuffer = Buffer.from(key.secret, "utf-8");
+            const confFile = new InputFile(Uint8Array.from(confBuffer), `wg-cfg-${key.userId}.conf`);
+            const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Уншиж байна...</b>", { parse_mode: "HTML" });
+            await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
+            return await ctx.replyWithDocument(confFile, {
+                parse_mode: "HTML",
+                caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
+            });
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(
@@ -287,8 +286,10 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                     reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `Түлхүүр алга...`),
                     { parse_mode: "HTML" }
                 );
-                return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
+                return await ctx.reply(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
             }
+            const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Уншиж байна...</b>", { parse_mode: "HTML" });
+            await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
             return await ctx.editMessageText(wireguarConfigText + `\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
         } catch (error) {
             console.error(error);
