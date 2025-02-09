@@ -10,6 +10,7 @@ type MinKey = {
 interface SessionData {
     keys: Array<MinKey>;
     wireguardLastKeyId: MinKey["id"];
+    wgLastMsgId: number | undefined;
 }
 
 type MyContext = Context & SessionFlavor<SessionData>;
