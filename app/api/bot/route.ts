@@ -201,97 +201,110 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
     .row()
     .back("Холболтын цэс рүү буцах ⬅️", goBackToConnectWrapper);
 
-const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
-    .text("🟢 QR код", async (ctx) => {
-        await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-        try {
-            const key = await retrieveLastAccessedKey(ctx);
-            await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", { parse_mode: "HTML" });
-            const qrBuffer = await QRCode.toBuffer(key.secret, {
-                errorCorrectionLevel: "H",
-                type: "png",
-                width: 300,
-                margin: 2,
-                color: {
-                    dark: "#000000",
-                    light: "#FFFFFF",
-                },
-            });
-            const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
+const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu", { onMenuOutdated: true })
+    .dynamic(async () => {
+        const range = new MenuRange<MyContext>();
+        range
+            .text("🟢 QR код", async (ctx) => {
+                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+                try {
+                    const key = await retrieveLastAccessedKey(ctx);
+                    await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", { parse_mode: "HTML" });
+                    const qrBuffer = await QRCode.toBuffer(key.secret, {
+                        errorCorrectionLevel: "H",
+                        type: "png",
+                        width: 300,
+                        margin: 2,
+                        color: {
+                            dark: "#000000",
+                            light: "#FFFFFF",
+                        },
+                    });
+                    const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
 
-            if (ctx.session.wgLastMsgId) {
-                ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                ctx.session.wgLastMsgId = undefined;
-            }
+                    if (ctx.session.wgLastMsgId) {
+                        ctx.deleteMessages([ctx.session.wgLastMsgId]);
+                        ctx.session.wgLastMsgId = undefined;
+                    }
 
-            const { message_id } = await ctx.replyWithPhoto(qrInputFile, {
-                parse_mode: "HTML",
-                show_caption_above_media: true,
-                caption: "🎊 QR код амжилттай үүсгэсэн!",
-            });
-            ctx.session.wgLastMsgId = message_id;
-        } catch (error) {
-            console.error(error);
-            await ctx.api.sendMessage(
-                config.adminTelegramId,
-                reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `QR код амжилтгүй...`),
-                { parse_mode: "HTML" }
-            );
-            return await ctx.reply("🚫 QR код үүсгэхэд алдаа гарлаа. Та дахин оролдоно уу.", { parse_mode: "HTML" });
-        }
+                    const { message_id } = await ctx.replyWithPhoto(qrInputFile, {
+                        parse_mode: "HTML",
+                        show_caption_above_media: true,
+                        caption: "🎊 QR код амжилттай үүсгэсэн!",
+                    });
+                    ctx.session.wgLastMsgId = message_id;
+                } catch (error) {
+                    console.error(error);
+                    await ctx.api.sendMessage(
+                        config.adminTelegramId,
+                        reportIssueText(
+                            ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`,
+                            `QR код амжилтгүй...`
+                        ),
+                        { parse_mode: "HTML" }
+                    );
+                    return await ctx.reply("🚫 QR код үүсгэхэд алдаа гарлаа. Та дахин оролдоно уу.", { parse_mode: "HTML" });
+                }
+            })
+            .row();
+        range
+            .text("🟡 .conf файл", async (ctx) => {
+                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+                try {
+                    const key = await retrieveLastAccessedKey(ctx);
+                    const confBuffer = Buffer.from(key.secret, "utf-8");
+                    const confFile = new InputFile(Uint8Array.from(confBuffer), `wg-cfg-${key.userId}.conf`);
+
+                    if (ctx.session.wgLastMsgId) {
+                        ctx.deleteMessages([ctx.session.wgLastMsgId]);
+                        ctx.session.wgLastMsgId = undefined;
+                    }
+
+                    const { message_id } = await ctx.replyWithDocument(confFile, {
+                        parse_mode: "HTML",
+                        caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
+                    });
+                    ctx.session.wgLastMsgId = message_id;
+                } catch (error) {
+                    console.error(error);
+                    await ctx.api.sendMessage(
+                        config.adminTelegramId,
+                        reportIssueText(
+                            ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`,
+                            `.conf файл амжилтгүй...`
+                        ),
+                        { parse_mode: "HTML" }
+                    );
+                    return await ctx.reply("🚫 .conf файл үүсгэхэд алдаа гарлаа. Та дахин оролдоно уу.", { parse_mode: "HTML" });
+                }
+            })
+            .row();
+        range
+            .text("🔴 Хуулах", async (ctx) => {
+                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+                try {
+                    const key = await retrieveLastAccessedKey(ctx);
+                    if (ctx.session.wgLastMsgId) {
+                        ctx.deleteMessages([ctx.session.wgLastMsgId]);
+                        ctx.session.wgLastMsgId = undefined;
+                    }
+                    return await ctx.editMessageText(wireguarConfigText + `\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
+                } catch (error) {
+                    console.error(error);
+                    await ctx.api.sendMessage(
+                        config.adminTelegramId,
+                        reportIssueText(
+                            ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`,
+                            `QR код амжилтгүй...`
+                        ),
+                        { parse_mode: "HTML" }
+                    );
+                    return await ctx.reply("🚫 Тохиргоо үүсгэхэд алдаа гарлаа. Та дахин оролдоно уу.", { parse_mode: "HTML" });
+                }
+            })
+            .row();
+        return range;
     })
-    .row()
-    .text("🟡 .conf файл", async (ctx) => {
-        await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-        try {
-            const key = await retrieveLastAccessedKey(ctx);
-            const confBuffer = Buffer.from(key.secret, "utf-8");
-            const confFile = new InputFile(Uint8Array.from(confBuffer), `wg-cfg-${key.userId}.conf`);
-
-            if (ctx.session.wgLastMsgId) {
-                ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                ctx.session.wgLastMsgId = undefined;
-            }
-
-            const { message_id } = await ctx.replyWithDocument(confFile, {
-                parse_mode: "HTML",
-                caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
-            });
-            ctx.session.wgLastMsgId = message_id;
-        } catch (error) {
-            console.error(error);
-            await ctx.api.sendMessage(
-                config.adminTelegramId,
-                reportIssueText(
-                    ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`,
-                    `.conf файл амжилтгүй...`
-                ),
-                { parse_mode: "HTML" }
-            );
-            return await ctx.reply("🚫 .conf файл үүсгэхэд алдаа гарлаа. Та дахин оролдоно уу.", { parse_mode: "HTML" });
-        }
-    })
-    .row()
-    .text("🔴 Хуулах", async (ctx) => {
-        await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-        try {
-            const key = await retrieveLastAccessedKey(ctx);
-            if (ctx.session.wgLastMsgId) {
-                ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                ctx.session.wgLastMsgId = undefined;
-            }
-            return await ctx.editMessageText(wireguarConfigText + `\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
-        } catch (error) {
-            console.error(error);
-            await ctx.api.sendMessage(
-                config.adminTelegramId,
-                reportIssueText(ctx.from.username ? `@${ctx.from.username} [${ctx.from.id}]` : `Anonymous [${ctx.from.id}]`, `QR код амжилтгүй...`),
-                { parse_mode: "HTML" }
-            );
-            return await ctx.reply("🚫 Тохиргоо үүсгэхэд алдаа гарлаа. Та дахин оролдоно уу.", { parse_mode: "HTML" });
-        }
-    })
-    .row()
     .back("WireGuard холбох цэс руу буцах ⬅️", async (ctx) => {
         try {
             await ctx.editMessageText(connectTextWireguard, { parse_mode: "HTML" });
