@@ -286,8 +286,7 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 );
                 return await ctx.reply(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
             }
-            const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Уншиж байна...</b>", { parse_mode: "HTML" });
-            await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
+
             return await ctx.reply(`\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
         } catch (error) {
             console.error(error);
