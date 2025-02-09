@@ -188,10 +188,13 @@ const connectWireguard = new Menu<MyContext>("connect-menu-wireguard")
 
 const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     .text("🟢 QR код", async (ctx) => {
-        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
+
+        const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+        await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
+
+        ctx.menu.nav("wireguard-config-menu");
 
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
@@ -231,10 +234,13 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     })
     .row()
     .text("🟡 .conf файл", async (ctx) => {
-        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
-
         const keyId = ctx.session.wireguardLastKeyId;
         if (!keyId) return await ctx.editMessageText(wireguarConfigText + "ℹ️<b>Menu хуучирсан байна та буцна уу.</b>", { parse_mode: "HTML" });
+
+        const { message_id: lastMsgId } = await ctx.reply("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+        await ctx.deleteMessages([lastMsgId, lastMsgId - 1]);
+
+        ctx.menu.nav("wireguard-config-menu");
 
         try {
             const key = await prisma.key.findUnique({ where: { id: keyId, type: "WireGuardVPN" } });
