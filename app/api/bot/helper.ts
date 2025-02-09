@@ -103,3 +103,10 @@ export const retrieveLastAccessedKey = async (ctx: MyContext & MenuFlavor) => {
     }
     return res.key;
 };
+
+export const deleteMoreRecentMessages = async (ctx: MyContext & MenuFlavor) => {
+    const start = ctx.msg?.message_id;
+    if (!start) return;
+    const { message_id: end } = await ctx.reply("🔶🔷🔶🔷🔶🔷🔶🔷🔶🔷🔶🔷🔶🔷🔶");
+    await ctx.deleteMessages(Array.from({ length: end - start }, (_, i) => start + i + 1));
+};

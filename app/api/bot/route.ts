@@ -29,7 +29,15 @@ import {
 import { config } from "@/lib/config";
 import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL } from "./hiddify";
 import { MyContext } from "./types";
-import { checkUser, extendByOneMonth, extendBySetDays, generateRandomString, getAllKeys, retrieveLastAccessedKey } from "./helper";
+import {
+    checkUser,
+    deleteMoreRecentMessages,
+    extendByOneMonth,
+    extendBySetDays,
+    generateRandomString,
+    getAllKeys,
+    retrieveLastAccessedKey,
+} from "./helper";
 import { VPNType } from "@prisma/client";
 import { createNewKeyWgOrOv } from "../keys/route";
 import QRCode from "qrcode";
@@ -206,14 +214,20 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu", { onMen
         const range = new MenuRange<MyContext>();
         range
             .text("🟢 QR код", async (ctx) => {
-                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү... (QR)</b>", {
+                    parse_mode: "HTML",
+                    link_preview_options: { show_above_text: true },
+                });
                 try {
                     const key = await retrieveLastAccessedKey(ctx);
-                    await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", { parse_mode: "HTML" });
+                    await ctx.editMessageText(wireguarConfigText + "ℹ️<b>QR кодийг үүсгэж байна...</b>", {
+                        parse_mode: "HTML",
+                        link_preview_options: { show_above_text: true },
+                    });
                     const qrBuffer = await QRCode.toBuffer(key.secret, {
                         errorCorrectionLevel: "H",
                         type: "png",
-                        width: 300,
+                        width: 280,
                         margin: 2,
                         color: {
                             dark: "#000000",
@@ -222,17 +236,17 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu", { onMen
                     });
                     const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
 
-                    if (ctx.session.wgLastMsgId) {
-                        ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                        ctx.session.wgLastMsgId = undefined;
-                    }
-
-                    const { message_id } = await ctx.replyWithPhoto(qrInputFile, {
+                    await ctx.editMessageText(wireguarConfigText + "<b>🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽</b>", {
                         parse_mode: "HTML",
-                        show_caption_above_media: true,
-                        caption: "🎊 QR код амжилттай үүсгэсэн!",
+                        link_preview_options: { show_above_text: true },
                     });
-                    ctx.session.wgLastMsgId = message_id;
+
+                    await deleteMoreRecentMessages(ctx);
+
+                    await ctx.replyWithPhoto(qrInputFile, {
+                        parse_mode: "HTML",
+                        disable_notification: true,
+                    });
                 } catch (error) {
                     console.error(error);
                     await ctx.api.sendMessage(
@@ -249,22 +263,25 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu", { onMen
             .row();
         range
             .text("🟡 .conf файл", async (ctx) => {
-                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү (файл)...</b>", {
+                    parse_mode: "HTML",
+                    link_preview_options: { show_above_text: true },
+                });
                 try {
                     const key = await retrieveLastAccessedKey(ctx);
                     const confBuffer = Buffer.from(key.secret, "utf-8");
                     const confFile = new InputFile(Uint8Array.from(confBuffer), `wg-cfg-${key.userId}.conf`);
 
-                    if (ctx.session.wgLastMsgId) {
-                        ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                        ctx.session.wgLastMsgId = undefined;
-                    }
-
-                    const { message_id } = await ctx.replyWithDocument(confFile, {
+                    await ctx.editMessageText(wireguarConfigText + "<b>🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽</b>", {
                         parse_mode: "HTML",
-                        caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
+                        link_preview_options: { show_above_text: true },
                     });
-                    ctx.session.wgLastMsgId = message_id;
+
+                    await deleteMoreRecentMessages(ctx);
+
+                    await ctx.replyWithDocument(confFile, {
+                        parse_mode: "HTML",
+                    });
                 } catch (error) {
                     console.error(error);
                     await ctx.api.sendMessage(
@@ -281,14 +298,19 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu", { onMen
             .row();
         range
             .text("🔴 Хуулах", async (ctx) => {
-                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+                await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү (хуулах)...</b>", {
+                    parse_mode: "HTML",
+                    link_preview_options: { show_above_text: true },
+                });
                 try {
                     const key = await retrieveLastAccessedKey(ctx);
-                    if (ctx.session.wgLastMsgId) {
-                        ctx.deleteMessages([ctx.session.wgLastMsgId]);
-                        ctx.session.wgLastMsgId = undefined;
-                    }
-                    return await ctx.editMessageText(wireguarConfigText + `\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
+
+                    await deleteMoreRecentMessages(ctx);
+
+                    return await ctx.editMessageText(wireguarConfigText + `\n<b>🔼🔼🔼🔼🔼🔼🔼🔼🔼🔼🔼🔼🔼🔼🔼</b>\n<code>${key.secret}</code>`, {
+                        parse_mode: "HTML",
+                        link_preview_options: { show_above_text: true },
+                    });
                 } catch (error) {
                     console.error(error);
                     await ctx.api.sendMessage(
