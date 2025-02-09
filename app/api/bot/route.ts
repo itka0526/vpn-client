@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 export const fetchCache = "force-no-store";
 
-import { Bot, InputFile, InputMediaBuilder, session, webhookCallback } from "grammy";
+import { Bot, InputFile, session, webhookCallback } from "grammy";
 import prisma from "@/lib/db";
 import { Menu, MenuRange } from "@grammyjs/menu";
 import {
@@ -218,13 +218,18 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
                 },
             });
             const qrInputFile = new InputFile(Uint8Array.from(qrBuffer), "qrcode.png");
-            return await ctx.editMessageMedia(
-                InputMediaBuilder.photo(qrInputFile, {
-                    parse_mode: "HTML",
-                    show_caption_above_media: true,
-                    caption: "🎊 QR код амжилттай үүсгэсэн!",
-                })
-            );
+
+            if (ctx.session.wgLastMsgId) {
+                ctx.deleteMessages([ctx.session.wgLastMsgId]);
+                ctx.session.wgLastMsgId = undefined;
+            }
+
+            const { message_id } = await ctx.replyWithPhoto(qrInputFile, {
+                parse_mode: "HTML",
+                show_caption_above_media: true,
+                caption: "🎊 QR код амжилттай үүсгэсэн!",
+            });
+            ctx.session.wgLastMsgId = message_id;
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(
@@ -242,12 +247,17 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
             const key = await retrieveLastAccessedKey(ctx);
             const confBuffer = Buffer.from(key.secret, "utf-8");
             const confFile = new InputFile(Uint8Array.from(confBuffer), `wg-cfg-${key.userId}.conf`);
-            return await ctx.editMessageMedia(
-                InputMediaBuilder.document(confFile, {
-                    parse_mode: "HTML",
-                    caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
-                })
-            );
+
+            if (ctx.session.wgLastMsgId) {
+                ctx.deleteMessages([ctx.session.wgLastMsgId]);
+                ctx.session.wgLastMsgId = undefined;
+            }
+
+            const { message_id } = await ctx.replyWithDocument(confFile, {
+                parse_mode: "HTML",
+                caption: "WireGuard тохиргооны `.conf` файл. Тохиргоог WireGuard аппликейшнд дотор 'Import'-лож ашиглана уу.",
+            });
+            ctx.session.wgLastMsgId = message_id;
         } catch (error) {
             console.error(error);
             await ctx.api.sendMessage(
@@ -263,9 +273,13 @@ const wireguardConfigMenu = new Menu<MyContext>("wireguard-config-menu")
     })
     .row()
     .text("🔴 Хуулах", async (ctx) => {
-        await ctx.editMessageText("<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
+        await ctx.editMessageText(wireguarConfigText + "<b>⏳ Түр хүлээнэ үү...</b>", { parse_mode: "HTML" });
         try {
             const key = await retrieveLastAccessedKey(ctx);
+            if (ctx.session.wgLastMsgId) {
+                ctx.deleteMessages([ctx.session.wgLastMsgId]);
+                ctx.session.wgLastMsgId = undefined;
+            }
             return await ctx.editMessageText(wireguarConfigText + `\n<code>${key.secret}</code>`, { parse_mode: "HTML" });
         } catch (error) {
             console.error(error);
