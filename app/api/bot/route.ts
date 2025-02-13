@@ -466,7 +466,7 @@ pmBot.filter(
                 const [userEmail, days] = rawMessage.split(" ").slice(1);
                 days ? await extendBySetDays(userEmail, Number(days)) : await extendByOneMonth(userEmail);
                 await ctx.reply("ℹ️ Амжилттай");
-            } else if (ctx.message.text.startsWith("/extend")) {
+            } else if (ctx.message.text.startsWith("/user")) {
                 const rawMessage = ctx.message.text;
                 const [userEmail] = rawMessage.split(" ").slice(1);
                 const user = await prisma.user.findUnique({ where: { email: userEmail } });
