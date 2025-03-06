@@ -428,10 +428,21 @@ pmBot.command("start", async (ctx) => {
         // Else we create the user
         const password = generateRandomString();
         const registeringUser = await ctx.reply("Бүртгэж байна... 👤");
-        const newUser = await prisma.user.create({ data: { email: generatedEmail, password: password } });
+        const newUser = await prisma.user.create({
+            data: { email: generatedEmail, password: password, userName: ctx.message.from.username ?? "Anonymous" },
+        });
         await ctx.deleteMessages([registeringUser.message_id, loadingMessage.message_id]);
         // Respond back to the user
-        return await ctx.reply(mainText(newUser, true), { reply_markup: main, parse_mode: "HTML", disable_notification: true });
+        await ctx.reply(mainText(newUser, true), { reply_markup: main, parse_mode: "HTML", disable_notification: true });
+        // Let the admin know that a new user has joined.
+        return await ctx.api.sendMessage(
+            config.adminTelegramId,
+            reportIssueText(
+                ctx.message.from.username ? `@${ctx.message.from.username} [${ctx.message.from.id}]` : `Anonymous [${ctx.message.from.id}]`,
+                `ℹ️ Шинэ хэрэглэгч нэмэгдлээ...`
+            ),
+            { parse_mode: "HTML", disable_notification: true }
+        );
     } catch (error) {
         console.error(error);
         await ctx.api.sendMessage(
