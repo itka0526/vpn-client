@@ -38,6 +38,7 @@ export const UserSchema = z.object({
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     activeTill: z.coerce.date(),
+    userName: z.string(),
     banned: z.boolean(),
 }) satisfies ZodType<User>;
 
