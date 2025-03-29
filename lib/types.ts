@@ -56,7 +56,7 @@ export const RegisterUserSchema = UserSchema.omit({ id: true, createdAt: true, u
         }
     });
 
-export const LoginUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true, activeTill: true, banned: true });
+export const LoginUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true, activeTill: true, banned: true, userName: true });
 
 export const AllVPNTypes = z.enum(["WireGuardVPN", "OpenVPN", "OutlineVPN", "HiddifyVPN"]) satisfies ZodType<VPNType>;
 
