@@ -42,6 +42,9 @@ import {
 import { VPNType } from "@prisma/client";
 import { createNewKeyWgOrOv } from "../keys/route";
 import QRCode from "qrcode";
+import { Api, TelegramClient } from "telegram";
+import { StringSession } from "telegram/sessions";
+import { _downloadPhoto } from "telegram/client/downloads";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -486,7 +489,58 @@ pmBot.filter(
                 const [userEmail] = rawMessage.split(" ").slice(1);
                 const user = await prisma.user.findUnique({ where: { email: userEmail } });
                 if (!user) return await ctx.reply(`ℹ️ Хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
-                await ctx.reply(`<code>${JSON.stringify(user, null, 2)}</code>`, { parse_mode: "HTML" });
+                if (userEmail?.endsWith(tgDomain)) {
+                    const stringSession = "";
+                    const BOT_TOKEN = process?.env?.TELEGRAM_BOT_TOKEN || "";
+                    const BOT_API_ID = process?.env?.TELEGRAM_BOT_API_ID || "";
+                    const BOT_API_HASH = process?.env?.TELEGRAM_BOT_API_HASH || "";
+
+                    if (!BOT_TOKEN || !BOT_API_ID || !BOT_API_HASH) {
+                        await ctx.reply("ℹ️ BOT_TOKEN | TELEGRAM_BOT_API_ID | TELEGRAM_BOT_API_HASH алга...", { parse_mode: "HTML" });
+                    }
+
+                    const client = new TelegramClient(new StringSession(stringSession), Number(BOT_API_ID), BOT_API_HASH, {
+                        connectionRetries: 5,
+                    });
+                    await client.start({
+                        botAuthToken: BOT_TOKEN,
+                    });
+                    type DataType = {
+                        firstName?: string | null;
+                        lastName?: string | null;
+                        username?: string | null;
+                        phone?: string | null;
+                        about?: string | null;
+                        birthday?: string | null;
+                    };
+                    const data: DataType = {};
+                    const apiUser = await client.invoke(
+                        new Api.users.GetFullUser({
+                            id: userEmail.split("@")[0],
+                        })
+                    );
+                    try {
+                        if (apiUser?.users.length > 0) {
+                            const fu = apiUser?.users[0] as DataType;
+                            data["firstName"] = (fu?.firstName as string) ?? null;
+                            data["lastName"] = (fu?.lastName as string) ?? null;
+                            data["username"] = (fu?.username as string) ?? null;
+                            data["phone"] = (fu?.phone as string) ?? null;
+                            data["about"] = (apiUser?.fullUser?.about as string) ?? null;
+                            data["birthday"] = apiUser?.fullUser?.birthday
+                                ? (`${apiUser?.fullUser?.birthday.day}/${apiUser?.fullUser?.birthday.month}/${apiUser?.fullUser?.birthday.year}` as string)
+                                : null;
+                            const photoBuffer = await _downloadPhoto(client, apiUser?.fullUser?.profilePhoto as Api.Photo);
+                            const photo = new InputFile(Uint8Array.from(photoBuffer as Buffer), "profile.png");
+                            await ctx.replyWithPhoto(photo);
+                        }
+                        await ctx.reply(`<code>${JSON.stringify({ ...user, data: { ...data } }, null, 2)}</code>`, { parse_mode: "HTML" });
+                    } catch (error) {
+                        if (!user) return await ctx.reply(`ℹ️ Telegram хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
+                    }
+                } else {
+                    await ctx.reply(`<code>${JSON.stringify(user, null, 2)}</code>`, { parse_mode: "HTML" });
+                }
             } else {
                 await ctx.reply(adminCommands, { parse_mode: "HTML" });
             }
