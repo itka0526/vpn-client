@@ -213,9 +213,9 @@ export const iPaidMessage = (user: string, message: string) => `
 
 export const askText = `📍 Та бот руу шууд хүсэлтээ бичнэ үү. \n 🖌️ Эсвэл лавлах зүйл байвал над руу бичнэ үү.\n${config.telegram}`;
 
-export const usersList = (users: Partial<User>[]) => `
-${users.map((u) => `${u.email}` + "\n")}
-`;
+export const usersList = (users: Partial<User>[]) => {
+    return users.map(({ email }) => `- <code>${email}</code>`).join("\n");
+};
 
 export const adminCommands = `
 Командууд:

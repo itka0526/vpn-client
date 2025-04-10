@@ -50,7 +50,6 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 
 if (!token) throw new Error("ℹ️ TELEGRAM_BOT_TOKEN environment variable not found.");
 
-const stringSession = "";
 const BOT_TOKEN = process?.env?.TELEGRAM_BOT_TOKEN || "";
 const BOT_API_ID = process?.env?.TELEGRAM_BOT_API_ID || "";
 const BOT_API_HASH = process?.env?.TELEGRAM_BOT_API_HASH || "";
@@ -58,14 +57,6 @@ const BOT_API_HASH = process?.env?.TELEGRAM_BOT_API_HASH || "";
 if (!BOT_TOKEN || !BOT_API_ID || !BOT_API_HASH) {
     throw new Error("ℹ️ BOT_TOKEN | TELEGRAM_BOT_API_ID | TELEGRAM_BOT_API_HASH алга...");
 }
-
-const tgClient = new TelegramClient(new StringSession(stringSession), Number(BOT_API_ID), BOT_API_HASH, {
-    connectionRetries: 5,
-});
-
-tgClient.start({
-    botAuthToken: BOT_TOKEN,
-});
 
 const main = new Menu<MyContext>("main-menu")
     .submenu("Холболт 🔌📱", "connect-wrapper", async (ctx) => await ctx.editMessageText(connectWrapperText, { parse_mode: "HTML" }))
@@ -486,6 +477,16 @@ pmBot.errorBoundary(async (err) => {
     return await err.ctx.reply(`${err.error}`);
 });
 
+type DataType = {
+    firstName?: string | null;
+    lastName?: string | null;
+    username?: string | null;
+    phone?: string | null;
+    about?: string | null;
+    birthday?: string | null;
+    hasPhoto?: boolean;
+};
+
 pmBot.filter(
     async (ctx) => {
         return `${ctx.from.id}` === config.adminTelegramId;
@@ -493,9 +494,9 @@ pmBot.filter(
     async (ctx) => {
         if (ctx.message?.text) {
             if (ctx.message.text.startsWith("/users")) {
-                const users = await prisma.user.findMany({ select: { email: true } });
+                const users = await prisma.user.findMany({ select: { email: true }, orderBy: { createdAt: "asc" } });
                 const list = "Хэрэглэгчид:\n" + usersList(users);
-                await ctx.reply(list);
+                await ctx.reply(list, { parse_mode: "HTML" });
             } else if (ctx.message.text.startsWith("/extend")) {
                 const rawMessage = ctx.message.text;
                 const [userEmail, days] = rawMessage.split(" ").slice(1);
@@ -507,23 +508,21 @@ pmBot.filter(
                 const user = await prisma.user.findUnique({ where: { email: userEmail } });
                 if (!user) return await ctx.reply(`ℹ️ Хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
                 if (userEmail?.endsWith(tgDomain)) {
-                    type DataType = {
-                        firstName?: string | null;
-                        lastName?: string | null;
-                        username?: string | null;
-                        phone?: string | null;
-                        about?: string | null;
-                        birthday?: string | null;
-                    };
                     const data: DataType = {};
                     await ctx.reply(`ℹ️ Telegram хэрэглэгчийг хайж байна...`, { parse_mode: "HTML" });
-                    const apiUser = await tgClient.invoke(
-                        new Api.users.GetFullUser({
-                            id: userEmail.split("@")[0],
-                        })
-                    );
-                    console.log(apiUser);
                     try {
+                        const stringSession = "";
+                        const tgClient = new TelegramClient(new StringSession(stringSession), Number(BOT_API_ID), BOT_API_HASH, {
+                            connectionRetries: 3,
+                        });
+                        await tgClient.start({
+                            botAuthToken: BOT_TOKEN,
+                        });
+                        const apiUser = await tgClient.invoke(
+                            new Api.users.GetFullUser({
+                                id: userEmail.split("@")[0],
+                            })
+                        );
                         await Promise.all([]);
                         if (apiUser?.users.length > 0) {
                             const fu = apiUser?.users[0] as DataType;
@@ -535,8 +534,9 @@ pmBot.filter(
                             data["birthday"] = apiUser?.fullUser?.birthday
                                 ? (`${apiUser?.fullUser?.birthday.day}/${apiUser?.fullUser?.birthday.month}/${apiUser?.fullUser?.birthday.year}` as string)
                                 : null;
+                            data["hasPhoto"] = Boolean(apiUser?.fullUser?.profilePhoto);
                             if (apiUser?.fullUser?.profilePhoto) {
-                                await ctx.reply(`ℹ️ Telegram хэрэглэгчийн зураг татаж  байна...`, { parse_mode: "HTML" });
+                                await ctx.reply(`ℹ️ Зураг татаж байна...`, { parse_mode: "HTML" });
                                 const photoBuffer = await _downloadPhoto(tgClient, apiUser?.fullUser?.profilePhoto as Api.Photo);
                                 const photo = new InputFile(Uint8Array.from(photoBuffer as Buffer), "profile.png");
                                 await ctx.replyWithPhoto(photo);
@@ -544,7 +544,7 @@ pmBot.filter(
                         }
                         await ctx.reply(`<code>${JSON.stringify({ ...user, data: { ...data } }, null, 2)}</code>`, { parse_mode: "HTML" });
                     } catch (error) {
-                        if (!user) return await ctx.reply(`ℹ️ Telegram хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
+                        if (!user) return await ctx.reply(`ℹ️ Алдаа: ${error}.`, { parse_mode: "HTML" });
                     }
                 } else {
                     await ctx.reply(`<code>${JSON.stringify(user, null, 2)}</code>`, { parse_mode: "HTML" });
@@ -573,6 +573,6 @@ pmBot.on("msg:text", async (ctx) => {
 });
 
 export const POST = webhookCallback(bot, "std/http", {
-    // onTimeout: "return",
-    // timeoutMilliseconds: 100,
+    onTimeout: "return",
+    timeoutMilliseconds: 100,
 });
