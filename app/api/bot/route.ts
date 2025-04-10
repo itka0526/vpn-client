@@ -487,7 +487,6 @@ pmBot.filter(
             } else if (ctx.message.text.startsWith("/user")) {
                 const rawMessage = ctx.message.text;
                 const [userEmail] = rawMessage.split(" ").slice(1);
-                await ctx.reply(`ℹ️ Хэрэглэгчийг сангаас хайж байна...`, { parse_mode: "HTML" });
                 const user = await prisma.user.findUnique({ where: { email: userEmail } });
                 if (!user) return await ctx.reply(`ℹ️ Хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
                 if (userEmail?.endsWith(tgDomain)) {
