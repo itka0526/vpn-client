@@ -48,7 +48,24 @@ import { _downloadPhoto } from "telegram/client/downloads";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
-if (!token) throw new Error("TELEGRAM_BOT_TOKEN environment variable not found.");
+if (!token) throw new Error("ℹ️ TELEGRAM_BOT_TOKEN environment variable not found.");
+
+const stringSession = "";
+const BOT_TOKEN = process?.env?.TELEGRAM_BOT_TOKEN || "";
+const BOT_API_ID = process?.env?.TELEGRAM_BOT_API_ID || "";
+const BOT_API_HASH = process?.env?.TELEGRAM_BOT_API_HASH || "";
+
+if (!BOT_TOKEN || !BOT_API_ID || !BOT_API_HASH) {
+    throw new Error("ℹ️ BOT_TOKEN | TELEGRAM_BOT_API_ID | TELEGRAM_BOT_API_HASH алга...");
+}
+
+const tgClient = new TelegramClient(new StringSession(stringSession), Number(BOT_API_ID), BOT_API_HASH, {
+    connectionRetries: 5,
+});
+
+tgClient.start({
+    botAuthToken: BOT_TOKEN,
+});
 
 const main = new Menu<MyContext>("main-menu")
     .submenu("Холболт 🔌📱", "connect-wrapper", async (ctx) => await ctx.editMessageText(connectWrapperText, { parse_mode: "HTML" }))
@@ -490,21 +507,6 @@ pmBot.filter(
                 const user = await prisma.user.findUnique({ where: { email: userEmail } });
                 if (!user) return await ctx.reply(`ℹ️ Хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
                 if (userEmail?.endsWith(tgDomain)) {
-                    const stringSession = "";
-                    const BOT_TOKEN = process?.env?.TELEGRAM_BOT_TOKEN || "";
-                    const BOT_API_ID = process?.env?.TELEGRAM_BOT_API_ID || "";
-                    const BOT_API_HASH = process?.env?.TELEGRAM_BOT_API_HASH || "";
-
-                    if (!BOT_TOKEN || !BOT_API_ID || !BOT_API_HASH) {
-                        await ctx.reply("ℹ️ BOT_TOKEN | TELEGRAM_BOT_API_ID | TELEGRAM_BOT_API_HASH алга...", { parse_mode: "HTML" });
-                    }
-
-                    const client = new TelegramClient(new StringSession(stringSession), Number(BOT_API_ID), BOT_API_HASH, {
-                        connectionRetries: 5,
-                    });
-                    await client.start({
-                        botAuthToken: BOT_TOKEN,
-                    });
                     type DataType = {
                         firstName?: string | null;
                         lastName?: string | null;
@@ -515,7 +517,7 @@ pmBot.filter(
                     };
                     const data: DataType = {};
                     await ctx.reply(`ℹ️ Telegram хэрэглэгчийг хайж байна...`, { parse_mode: "HTML" });
-                    const apiUser = await client.invoke(
+                    const apiUser = await tgClient.invoke(
                         new Api.users.GetFullUser({
                             id: userEmail.split("@")[0],
                         })
@@ -535,7 +537,7 @@ pmBot.filter(
                                 : null;
                             if (apiUser?.fullUser?.profilePhoto) {
                                 await ctx.reply(`ℹ️ Telegram хэрэглэгчийн зураг татаж  байна...`, { parse_mode: "HTML" });
-                                const photoBuffer = await _downloadPhoto(client, apiUser?.fullUser?.profilePhoto as Api.Photo);
+                                const photoBuffer = await _downloadPhoto(tgClient, apiUser?.fullUser?.profilePhoto as Api.Photo);
                                 const photo = new InputFile(Uint8Array.from(photoBuffer as Buffer), "profile.png");
                                 await ctx.replyWithPhoto(photo);
                             }
