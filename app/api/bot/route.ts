@@ -487,6 +487,7 @@ pmBot.filter(
             } else if (ctx.message.text.startsWith("/user")) {
                 const rawMessage = ctx.message.text;
                 const [userEmail] = rawMessage.split(" ").slice(1);
+                await ctx.reply(`ℹ️ Хэрэглэгчийг сангаас хайж байна...`, { parse_mode: "HTML" });
                 const user = await prisma.user.findUnique({ where: { email: userEmail } });
                 if (!user) return await ctx.reply(`ℹ️ Хэрэглэгч олдсонгүй.`, { parse_mode: "HTML" });
                 if (userEmail?.endsWith(tgDomain)) {
@@ -514,12 +515,15 @@ pmBot.filter(
                         birthday?: string | null;
                     };
                     const data: DataType = {};
+                    await ctx.reply(`ℹ️ Telegram хэрэглэгчийг хайж байна...`, { parse_mode: "HTML" });
                     const apiUser = await client.invoke(
                         new Api.users.GetFullUser({
                             id: userEmail.split("@")[0],
                         })
                     );
+                    console.log(apiUser);
                     try {
+                        await Promise.all([]);
                         if (apiUser?.users.length > 0) {
                             const fu = apiUser?.users[0] as DataType;
                             data["firstName"] = (fu?.firstName as string) ?? null;
@@ -530,9 +534,12 @@ pmBot.filter(
                             data["birthday"] = apiUser?.fullUser?.birthday
                                 ? (`${apiUser?.fullUser?.birthday.day}/${apiUser?.fullUser?.birthday.month}/${apiUser?.fullUser?.birthday.year}` as string)
                                 : null;
-                            const photoBuffer = await _downloadPhoto(client, apiUser?.fullUser?.profilePhoto as Api.Photo);
-                            const photo = new InputFile(Uint8Array.from(photoBuffer as Buffer), "profile.png");
-                            await ctx.replyWithPhoto(photo);
+                            if (apiUser?.fullUser?.profilePhoto) {
+                                await ctx.reply(`ℹ️ Telegram хэрэглэгчийн зураг татаж  байна...`, { parse_mode: "HTML" });
+                                const photoBuffer = await _downloadPhoto(client, apiUser?.fullUser?.profilePhoto as Api.Photo);
+                                const photo = new InputFile(Uint8Array.from(photoBuffer as Buffer), "profile.png");
+                                await ctx.replyWithPhoto(photo);
+                            }
                         }
                         await ctx.reply(`<code>${JSON.stringify({ ...user, data: { ...data } }, null, 2)}</code>`, { parse_mode: "HTML" });
                     } catch (error) {
