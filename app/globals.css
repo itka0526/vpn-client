@@ -3,15 +3,8 @@
 @tailwind utilities;
 
 :root {
-    --background: #ffffff;
-    --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-    }
+    --background: #0a0a0a;
+    --foreground: #ededed;
 }
 
 body {
@@ -54,6 +47,26 @@ body {
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
     }
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: transparent #0a0a0a;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: #0a0a0a;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(150, 150, 150, 0.5);
+    border-radius: 8px;
 }
 
 @layer base {

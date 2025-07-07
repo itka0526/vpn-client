@@ -11,7 +11,8 @@ import { useEffect } from "react";
 import { SubmitButton } from "../ui/submit-button";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, EyeIcon } from "lucide-react";
+import { config } from "@/lib/config";
 
 export function LoginForm() {
     const initialState: FormState = { message: null, errors: {} };
@@ -24,8 +25,8 @@ export function LoginForm() {
     }, [formState.errors, formState.message]);
 
     return (
-        <form className="flex items-start justify-center h-screen bg-background" action={formAction}>
-            <Card className="w-full max-w-md p-6 sm:p-8">
+        <form className="bg-background flex items-start justify-center h-screen" action={formAction}>
+            <Card className="sm:p-8 w-full max-w-md p-6">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold">Нэвтрэх</CardTitle>
                     <CardDescription>Нэвтрэхийн тулд и-мэйл хаяг, нууц үгээ оруулна уу.</CardDescription>
@@ -35,7 +36,7 @@ export function LoginForm() {
                         <Label htmlFor="email">И-мэйл хаяг</Label>
                         <Input name="email" id="email" type="email" placeholder="И-мэйл хаягаа оруулна уу" />
                         {formState.errors?.email?.map((err, idx) => (
-                            <p className="text-sm text-destructive" key={`${err}${idx}`}>
+                            <p className="text-destructive text-sm" key={`${err}${idx}`}>
                                 {err}
                             </p>
                         ))}
@@ -44,7 +45,7 @@ export function LoginForm() {
                         <Label htmlFor="password">Нууц үг</Label>
                         <Input name="password" id="password" type="password" placeholder="Нууц үгээ оруулна уу" />
                         {formState.errors?.password?.map((err, idx) => (
-                            <p className="text-sm text-destructive" key={`${err}${idx}`}>
+                            <p className="text-destructive text-sm" key={`${err}${idx}`}>
                                 {err}
                             </p>
                         ))}
@@ -52,10 +53,16 @@ export function LoginForm() {
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
                     <SubmitButton text="Нэвтрэх" />
-                    <Button variant="link" asChild className="px-0 text-sm text-muted-foreground hover:text-primary">
+                    <Button variant="link" asChild className="text-muted-foreground hover:text-primary px-0 text-sm">
                         <Link href="/register" className="flex items-center">
                             Бүртгэлгүй юу? Бүртгүүлэх
-                            <ArrowRight className="ml-1 h-4 w-4" />
+                            <ArrowRight className="w-4 h-4 ml-1" />
+                        </Link>
+                    </Button>
+                    <Button variant="link" asChild className="text-muted-foreground hover:text-primary px-0 text-sm">
+                        <Link href={config.telegramBot + "?start=help"} target="_blank" className="flex items-center">
+                            Нэр, нууц үг харах
+                            <EyeIcon className="w-4 h-4 ml-2" />
                         </Link>
                     </Button>
                 </CardFooter>

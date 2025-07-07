@@ -12,7 +12,7 @@ export const config = {
     bankType: "Сбербанк - Итгэлт",
     paymentAmountPerMonth: 100,
     usageLimitGB: null,
-    wireguard: true,
+    wireguard: false,
     openvpn: false,
     outline: false,
     hiddify: true,

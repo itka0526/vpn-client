@@ -32,7 +32,7 @@ export default async function Dashboard() {
                 </Suspense>
                 <Suspense
                     fallback={
-                        <div className="w-full h-full flex items-center justify-center">
+                        <div className="flex items-center justify-center w-full h-full">
                             <Spinner />
                         </div>
                     }

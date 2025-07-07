@@ -135,5 +135,31 @@ async function removeHiddifyKeyDetails(uuid: string) {
         throw error;
     }
 }
+
+async function deactivateHiddifyKeyDetails(uuid: string) {
+    const url = new URL(HIDDIFY_API_ADMIN_BASE_URL + `/api/v2/admin/user/${uuid}/`);
+
+    const options = {
+        method: "PATCH",
+        headers: {
+            Accept: "application/json",
+            "Hiddify-API-Key": process.env.HIDDIFY_API_KEY,
+        } as HeadersInit,
+    };
+
+    try {
+        const response = await fetch(url.toString(), options);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Hiddify API Error: ${response.status} ${errorText}`);
+        }
+        const data: HiddifyKeyResponseType = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching Hiddify user details:", error);
+        throw error;
+    }
+}
+
 const { HIDDIFY_API_ADMIN_BASE_URL, HIDDIFY_API_USER_BASE_URL, HIDDIFY_BASE_URL } = getHiddifyUrls();
 export { createHiddifyKey, getHiddifyKeyDetails, removeHiddifyKeyDetails, HIDDIFY_API_ADMIN_BASE_URL, HIDDIFY_API_USER_BASE_URL, HIDDIFY_BASE_URL };

@@ -80,10 +80,18 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
     if (!session.userId) {
         return NextResponse.json({ message: "Та эхлээд нэвтэрнэ үү.", status: false });
     }
+
+    const { searchParams } = new URL(req.url);
+    const validatedVPNType = AllVPNTypes.safeParse(searchParams.get("VPNType"));
+
+    if (!validatedVPNType.success) {
+        return NextResponse.json({ message: "Буруу 'Request Query' явуулсан байна.", status: false });
+    }
+
     // Check if limit exceeded and if the user is banned
     const dbRes = await prisma.user.findUnique({
         where: { id: session.userId },
-        select: { email: true, banned: true, activeTill: true, _count: { select: { keys: true } } },
+        select: { email: true, banned: true, activeTill: true, _count: { select: { keys: { where: { type: validatedVPNType.data } } } } },
     });
     if (!dbRes) {
         return NextResponse.json({ message: "Өгөгдлийн санд алдаа гарлаа.", status: false });
@@ -97,12 +105,6 @@ export async function POST(req: NextRequest): Promise<NextResponse<KeyRouteRespT
     }
     if (_count.keys >= config.deviceLimitPerAcc) {
         return NextResponse.json({ message: "Лимит хэтэрсэн байна.", status: false });
-    }
-    const { searchParams } = new URL(req.url);
-    const validatedVPNType = AllVPNTypes.safeParse(searchParams.get("VPNType"));
-
-    if (!validatedVPNType.success) {
-        return NextResponse.json({ message: "Буруу 'Request Query' явуулсан байна.", status: false });
     }
 
     try {

@@ -9,6 +9,7 @@ import { useState } from "react";
 import { KeyRouteRespType } from "../api/keys/route";
 import toast from "react-hot-toast";
 import { ConfigItemProps } from "@/lib/types";
+import clsx from "clsx";
 
 export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKeys }: ConfigItemProps) {
     const { copied, copyToClipboard } = useCopy();
@@ -38,7 +39,11 @@ export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKe
     };
 
     return (
-        <div className="h-min flex items-center justify-between m-0 md:mx-6 px-6 py-2 border bg-gray-800 border-gray-700 focus:ring-gray-700 focus:border-gray-700 rounded-md">
+        <div
+            className={clsx(
+                "h-min flex items-center justify-between m-0 md:mx-6 px-6 py-2 border bg-gray-800 border-gray-700 focus:ring-gray-700 focus:border-gray-700 rounded-md"
+            )}
+        >
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -49,7 +54,7 @@ export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKe
                             className="text-blue-400 hover:text-blue-300 transition-colors flex items-center min-w-0 max-w-[1000px]"
                         >
                             <Button variant={"link"} className="p-2" size={"icon"}>
-                                <ExternalLink className="h-4 w-4 text-primary-foreground " />
+                                <ExternalLink className="text-primary-foreground  w-4 h-4" />
                             </Button>
                             <span className="mr-1 truncate">{config}</span>
                         </Link>
@@ -59,18 +64,18 @@ export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKe
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-            <span className="text-sm text-gray-400 flex-shrink-0 mx-2 hidden md:block">{formattedDate}</span>
+            <span className="md:block flex-shrink-0 hidden mx-2 text-sm text-gray-400">{formattedDate}</span>
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button onClick={() => deleteKey()} variant={"ghost"} disabled={deletingKey} className="max-md:mr-2">
                             {!deletingKey ? (
                                 <>
-                                    <Trash2 className="md:mr-2 h-4 w-4" /> <span className="hidden md:block">Устгах</span>
+                                    <Trash2 className="md:mr-2 w-4 h-4" /> <span className="md:block hidden">Устгах</span>
                                 </>
                             ) : (
                                 <>
-                                    <Loader2 className="md:mr-2 h-4 w-4 animate-spin" /> <span className="hidden md:block">Устгах</span>
+                                    <Loader2 className="md:mr-2 animate-spin w-4 h-4" /> <span className="md:block hidden">Устгах</span>
                                 </>
                             )}
                         </Button>
@@ -79,11 +84,11 @@ export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKe
                         <Button onClick={() => copyToClipboard(config)} variant={"ghost"}>
                             {copied ? (
                                 <>
-                                    <Check className="md:mr-2 h-4 w-4" /> <span className="hidden md:block">Хууллаа</span>
+                                    <Check className="md:mr-2 w-4 h-4" /> <span className="md:block hidden">Хууллаа</span>
                                 </>
                             ) : (
                                 <>
-                                    <Copy className="md:mr-2 h-4 w-4" /> <span className="hidden md:block">Хуулах</span>
+                                    <Copy className="md:mr-2 w-4 h-4" /> <span className="md:block hidden">Хуулах</span>
                                 </>
                             )}
                         </Button>

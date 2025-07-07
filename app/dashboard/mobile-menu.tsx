@@ -15,7 +15,7 @@ export function MobileMenu({ activeTill, inactive }: { activeTill: Date; inactiv
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
                     <Button variant="default" size="icon" className="md:hidden">
-                        <MenuIcon className="h-5 w-5" />
+                        <MenuIcon className="w-5 h-5" />
                         <span className="sr-only">Toggle menu</span>
                     </Button>
                 </SheetTrigger>
@@ -23,10 +23,10 @@ export function MobileMenu({ activeTill, inactive }: { activeTill: Date; inactiv
                     <SheetHeader>
                         <SheetTitle>Цэс</SheetTitle>
                     </SheetHeader>
-                    <div className="flex flex-col justify-between space-y-4 mt-4">
+                    <div className="flex flex-col justify-between mt-4 space-y-4">
                         <div className="block text-sm text-gray-400">
                             <span className="block">Хүчинтэй хугацаа:</span>
-                            <span className="font-medium text-gray-200">{activeTill.toLocaleString()}</span>
+                            <span className="font-medium text-gray-200">{activeTill.toLocaleString("ru-RU")}</span>
                         </div>
                         <div className="flex flex-col space-y-4">
                             <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -35,7 +35,7 @@ export function MobileMenu({ activeTill, inactive }: { activeTill: Date; inactiv
                                 </Link>
                             </Button>
                             <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={logout}>
-                                <LogOutIcon className="h-4 w-4 md:mr-2" />
+                                <LogOutIcon className="md:mr-2 w-4 h-4" />
                                 <span className="block">Гарах</span>
                             </Button>
                         </div>
