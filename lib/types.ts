@@ -74,6 +74,7 @@ export const sessionOptions: SessionOptions = {
     cookieName: "cookie-monster",
     cookieOptions: {
         secure: true,
+        sameSite: "none",
     },
 };
 

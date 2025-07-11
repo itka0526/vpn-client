@@ -33,15 +33,16 @@ ${nu ? "\n👤 Шинэ хэрэглэгч болгон 14 хоногийн үн
 🛠️ Тохируулахад хялбар
 💻 Бүх төхөөрөмжийг дэмждэг
 
+⛓️‍💥 <a href="${config.website}">GalVPN вебсайт</a>
+
 <b>${
     u.banned
-        ? "🚫 Дансны төлөв блоклогдсон"
+        ? "🚫 Блоклогдсон"
         : new Date() > u.activeTill
-        ? "💵 Дансны төлөв хүчингүй [төлбөр төлөх]"
-        : `✅ Дансны төлөв хүчинтэй [${u.activeTill.toISOString().split("T")[0]}]`
+        ? "💵 Төлбөр төлнө үү"
+        : `✅ ${u.activeTill.toLocaleDateString("mn-MN", { dateStyle: "medium" })} хүртэл хүчинтэй`
 }</b>
 
-⛓️‍💥 <a href="${config.website}">GalVPN вебсайт</a>
 `;
 
 export const paymentText = (email: string) => `
@@ -209,7 +210,7 @@ export const iPaidMessage = (user: string, message: string) => `
 - ${message}
 `;
 
-export const askText = `📍 Та бот руу шууд хүсэлтээ бичнэ үү. \n 🖌️ Эсвэл лавлах зүйл байвал над руу бичнэ үү.\n${config.telegram}`;
+export const askText = `📍 Та бот руу доор шууд хүсэлтээ бичнэ үү. \n 🖌️ Эсвэл лавлах зүйл байвал над руу бичнэ үү.\n${config.telegram}`;
 
 export const usersList = (users: Partial<User>[]) => {
     return users.map(({ email }) => `- <code>${email}</code>`).join("\n");

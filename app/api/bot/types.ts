@@ -15,4 +15,14 @@ interface SessionData {
 
 type MyContext = Context & SessionFlavor<SessionData>;
 
-export { type MyContext, type SessionData, type MinKey };
+type DataType = {
+    firstName?: string | null;
+    lastName?: string | null;
+    username?: string | null;
+    phone?: string | null;
+    about?: string | null;
+    birthday?: string | null;
+    hasPhoto?: boolean;
+};
+
+export { type MyContext, type SessionData, type MinKey, type DataType };

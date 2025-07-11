@@ -48,7 +48,7 @@ export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKe
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Link
-                            href={config}
+                            href={`/api/keys/middleware?configLink=${encodeURI(config)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-400 hover:text-blue-300 transition-colors flex items-center min-w-0 max-w-[1000px]"

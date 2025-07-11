@@ -8,9 +8,16 @@ import { deleteKeysFromDB } from "@/lib/utils";
 export async function GET() {
     const res = await prisma.user.findMany({
         where: {
-            activeTill: {
-                lte: new Date(),
-            },
+            OR: [
+                {
+                    activeTill: {
+                        lte: new Date(),
+                    },
+                },
+                {
+                    banned: true,
+                },
+            ],
         },
         select: {
             keys: true,

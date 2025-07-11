@@ -14,7 +14,6 @@ export async function POST(req: NextRequest) {
 
     // <auth-type> must be "tma", and <auth-data> is Telegram Mini Apps init data.
     const [authType, authData = ""] = (req.headers.get("Authorization") || "").split(" ");
-
     switch (authType) {
         case "tma":
             try {

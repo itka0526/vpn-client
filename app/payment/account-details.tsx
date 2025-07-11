@@ -28,7 +28,7 @@ export function AccountDetails({ content, className }: AccountDetailsProps) {
             </span>
             <button
                 onClick={handleCopy}
-                className="absolute right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-0 p-1 opacity-0 hover-hover:group-hover:opacity-100 transition-opacity"
                 aria-label={isCopied ? "Copied" : "Copy to clipboard"}
             >
                 {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-gray-500 hover:text-gray-700" />}

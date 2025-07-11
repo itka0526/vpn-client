@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { isTMA, retrieveLaunchParams, retrieveRawInitData } from "@telegram-apps/sdk-react";
+import { isTMA, retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Spinner } from "../ui/spinner";
-import { init } from "../telegram/core/init";
 
 export default function AuthSection() {
     const router = useRouter();
@@ -19,20 +18,6 @@ export default function AuthSection() {
 
     useEffect(() => {
         if (!isTMA()) return;
-
-        const initializeTMA = async () => {
-            // Initialization Parameters
-            const launchParams = retrieveLaunchParams();
-            const { tgWebAppPlatform: platform } = launchParams;
-            const debug = (launchParams.tgWebAppStartParam || "").includes("platformer_debug") || process.env.NODE_ENV === "development";
-
-            // Initialize TMA
-            init({
-                debug,
-                eruda: debug && ["ios", "android"].includes(platform),
-                mockForMacOS: platform === "macos",
-            });
-        };
 
         const initDataRaw = retrieveRawInitData();
         if (!initDataRaw) return;
@@ -50,8 +35,6 @@ export default function AuthSection() {
                 if (resp.status === 200) {
                     toast.success(jsonResp?.message);
 
-                    // On success install TMA
-                    await initializeTMA();
                     router.push("/dashboard");
                 } else {
                     toast.error(jsonResp?.message);
@@ -62,7 +45,7 @@ export default function AuthSection() {
         };
 
         requestLogin();
-    }, []);
+    }, [router]);
 
     if (loading) {
         return (

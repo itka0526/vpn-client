@@ -10,6 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountDetails } from "./account-details";
 import { BackBtn } from "@/components/ui/back-btn";
+import { CheckPaymentButton } from "./check-payment-button";
 
 export default async function Page() {
     const user = await getSession();
@@ -25,6 +26,7 @@ export default async function Page() {
             redirect("/login");
         }
     }
+
     return (
         <section>
             <Card className="w-full max-w-xl bg-gray-800 border-gray-700">
@@ -43,6 +45,9 @@ export default async function Page() {
                             <span className="text-red-400">
                                 ({config.bankType}) <AccountDetails content={config.accountDetails} />
                             </span>
+                            <br />
+                            <br />
+                            <CheckPaymentButton />
                             <br />
                             <br />
                             <em>Төлбөрийг баталгаажуулсаны дараа сунгагдах болно. Хэрэв танд нэмэлт асуулт байвал холбоо барина уу.</em>

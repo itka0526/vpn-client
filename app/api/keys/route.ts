@@ -19,7 +19,7 @@ export type KeyRouteRespType = { message: string } & (
       }
 );
 
-export const createNewKeyWgOrOv = {
+const createNewKeyWgOrOv = {
     checkServerEnv: () => {
         let etwg = process.env.WGIP,
             wgpw = process.env.WGPW,

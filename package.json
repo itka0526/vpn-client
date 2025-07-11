@@ -60,6 +60,7 @@
         "eslint-config-next": "14.2.11",
         "postcss": "^8",
         "tailwindcss": "^3.4.1",
+        "telegraf-middleware-console-time": "^3.0.0",
         "typescript": "^5"
     }
 }
