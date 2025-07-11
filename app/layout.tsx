@@ -6,7 +6,6 @@ import NextTopLoader from "nextjs-toploader";
 // import { InfoBox } from "@/components/info-box";
 import { Contact, ScrollTextIcon } from "lucide-react";
 import Link from "next/link";
-import { requestFullscreen } from "@telegram-apps/sdk-react";
 // import Welcome from "@/components/welcome";
 
 const geistSans = localFont({
