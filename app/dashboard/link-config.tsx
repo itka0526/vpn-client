@@ -48,6 +48,7 @@ export function LinkConfig({ item: { createdAt, keyPath: config, id }, setUserKe
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Link
+                            prefetch={false}
                             href={`/api/keys/middleware?configLink=${encodeURI(config)}`}
                             target="_blank"
                             rel="noopener noreferrer"

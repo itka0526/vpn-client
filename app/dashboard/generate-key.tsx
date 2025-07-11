@@ -6,8 +6,6 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { KeyRouteRespType } from "../api/keys/route";
 import toast from "react-hot-toast";
 import { PlusIcon } from "lucide-react";
-import { isTMA } from "@telegram-apps/sdk-react";
-import { useHapticFeedback } from "@vkruglikov/react-telegram-web-app";
 
 export function GenerateKey({
     setState,
@@ -19,15 +17,13 @@ export function GenerateKey({
     VPNType: VPNType;
 }) {
     const [loading, setLoading] = useState(false);
-    const [notificationOccurred] = useHapticFeedback();
 
     const fetchKey = async () => {
         setLoading(true);
-        if (isTMA()) {
-            notificationOccurred("medium");
-        }
+
         try {
             const resp = await fetch("/api/keys" + `?VPNType=${VPNType}`, { method: "POST" });
+            console.log(resp);
             const res: KeyRouteRespType = await resp.json();
             if (res.status) {
                 setState((prevState) => [...prevState, res.data]);
