@@ -23,7 +23,6 @@ export function GenerateKey({
 
         try {
             const resp = await fetch("/api/keys" + `?VPNType=${VPNType}`, { method: "POST" });
-            console.log(resp);
             const res: KeyRouteRespType = await resp.json();
             if (res.status) {
                 setState((prevState) => [...prevState, res.data]);
