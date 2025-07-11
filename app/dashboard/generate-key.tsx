@@ -36,10 +36,11 @@ export function GenerateKey({
                 toast.error(res.message);
             }
         } catch (err) {
+            console.error(err);
             toast.error("Алдаа гарлаа.");
-            return;
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
