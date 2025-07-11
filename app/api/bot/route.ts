@@ -17,6 +17,6 @@ import "../telegram/admin/commands";
 import "./callbackQuery/suggestion/handler"; // This will capture all 'MESSAGES'
 
 export const POST = webhookCallback(bot, "std/http", {
-    onTimeout: "return",
-    timeoutMilliseconds: 100,
+    // onTimeout: "return",
+    // timeoutMilliseconds: 100,
 });
