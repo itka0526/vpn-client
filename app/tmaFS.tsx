@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { bindViewportCssVars, init, mountViewport, swipeBehavior, viewport } from "@telegram-apps/sdk-react";
+import { bindViewportCssVars, init, isTMA, mountViewport, swipeBehavior, viewport } from "@telegram-apps/sdk-react";
 
 export default function TMAFullscreen() {
     const mountedRef = useRef(false);
 
     useEffect(() => {
-        if (mountedRef.current) return;
+        if (mountedRef.current || !isTMA()) return;
         mountedRef.current = true;
 
         const run = async () => {

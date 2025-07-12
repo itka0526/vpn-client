@@ -3,16 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Copy, LucideQrCode, Trash2, XIcon } from "lucide-react";
-import { useState } from "react";
+import { Check, Copy, Download, LucideQrCode, Trash2, XIcon } from "lucide-react";
+import { useCallback, useState } from "react";
 import QRCode from "react-qr-code";
 import { useCopy } from "./copy";
 import { KeyRouteRespType } from "../api/keys/route";
 import toast from "react-hot-toast";
 import { ConfigItemProps } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { isTMA } from "@telegram-apps/sdk-react";
 
-export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigItemProps) {
+export function WgConfig({ item: { secret: config, id, keyPath }, setUserKeys }: ConfigItemProps) {
     const [open, setOpen] = useState(false);
     const { copied, copyToClipboard } = useCopy();
 
@@ -32,6 +33,26 @@ export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigIt
         }
         setDeletingKey(false);
     };
+
+    const fileName = keyPath.split("/").at(-1) ?? "RANDOM_KEY";
+
+    const rawDownloadKey = useCallback(() => {
+        const element = document.createElement("a");
+        const file = new Blob([config], { type: "text/plain" });
+
+        element.setAttribute("href", URL.createObjectURL(file));
+        element.setAttribute("download", fileName);
+
+        element.click();
+        URL.revokeObjectURL(element.href);
+    }, [config, fileName]);
+
+    const downloadKey = isTMA()
+        ? () => {
+              toast.error("Уучлаарай! Та вебсайт руу орж татаарай!");
+          }
+        : rawDownloadKey;
+
     return (
         <>
             {open && (
@@ -39,10 +60,10 @@ export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigIt
                     className="fixed z-50 inset-0 w-screen h-screen bg-[rgba(255,255,255,0.2)] flex justify-center items-center"
                     onClick={() => setOpen(false)}
                 >
-                    <div className="absolute top-8 right-8">
+                    <div className="top-8 right-8 absolute">
                         <XIcon width={48} height={48} color="black" className="hover:rotate-90 transition-transform cursor-pointer" />
                     </div>
-                    <div className="rounded-md shadow-md p-6 bg-white pointer-events-none">
+                    <div className="p-6 bg-white rounded-md shadow-md pointer-events-none">
                         <QRCode value={config} size={280} />
                     </div>
                 </div>
@@ -51,7 +72,7 @@ export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigIt
                 <Textarea
                     readOnly
                     value={config}
-                    className="font-mono text-sm h-64 mb-4 bg-gray-800 text-white border-gray-700 focus:ring-gray-700 focus:border-gray-700"
+                    className="focus:ring-gray-700 focus:border-gray-700 h-64 mb-4 font-mono text-sm text-white bg-gray-800 border-gray-700"
                     placeholder="Nothing..."
                 />
                 <div className="flex gap-4">
@@ -66,6 +87,7 @@ export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigIt
                                 <p className="text-sm text-gray-400">{deletingKey ? "Устгаж байна..." : "Түлхүүр устгах"}</p>
                             </TooltipContent>
                         </Tooltip>
+
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button onClick={() => copyToClipboard(config)}>{copied ? <Check /> : <Copy />}</Button>
@@ -74,11 +96,23 @@ export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigIt
                                 <p className="text-sm text-gray-400">{copied ? "Хууллаа" : "Хуулах"} </p>
                             </TooltipContent>
                         </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button onClick={downloadKey}>
+                                    <Download />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-sm text-gray-400">Татах</p>
+                            </TooltipContent>
+                        </Tooltip>
+
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button onClick={() => setOpen(true)} className="w-full">
                                     <LucideQrCode className="mr-2" />
-                                    <span className="font-medium text-gray-100 ">QR код</span>
+                                    <span className=" font-medium text-gray-100">QR код</span>
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
