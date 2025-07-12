@@ -17,16 +17,9 @@ export function DashboardItemsOpenVPN({ userKeys, setUserKeys }: { userKeys: Key
                 <KeyCounter count={keyCount} max={config.deviceLimitPerAcc} type="OpenVPN" />
                 <GenerateKey setState={setUserKeys} limitExceeded={keyCount >= config.deviceLimitPerAcc} VPNType={"OpenVPN"} />
             </section>
-            <section className="md:grid-cols-3 md:gap-4 md:p-4 grid w-full h-full grid-cols-1 gap-8">
+            <section className="md:gap-4 md:p-4 grid w-full h-full grid-cols-1 gap-8 place-content-start">
                 {userKeys.filter(ff).map((item) => {
-                    return (
-                        <OvConfig
-                            key={`config-${item.id}`}
-                            config={item.secret}
-                            fileName={item.keyPath.replace("/root/", "")}
-                            createdAt={item.createdAt}
-                        />
-                    );
+                    return <OvConfig key={`config-${item.id}`} setUserKeys={setUserKeys} item={item} fileName={item.keyPath.replace("/root/", "")} />;
                 })}
             </section>
         </>

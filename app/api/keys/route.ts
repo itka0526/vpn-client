@@ -200,7 +200,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<KeyRouteRes
     if (!session.userId) {
         return NextResponse.json({ message: "Та эхлээд нэвтэрнэ үү.", status: false });
     }
-    // Check if limit exceeded and if the user is banned
+    // Check if the user is banned
     const dbRes = await prisma.user.findUnique({
         where: { id: session.userId },
         select: { email: true, banned: true, activeTill: true, keys: true },

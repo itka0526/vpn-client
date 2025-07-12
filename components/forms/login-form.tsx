@@ -59,7 +59,14 @@ export function LoginForm() {
                             <ArrowRight className="w-4 h-4 ml-1" />
                         </Link>
                     </Button>
-                    <Button variant="link" asChild className="text-muted-foreground hover:text-primary px-0 text-sm">
+                    <Button
+                        variant="link"
+                        asChild
+                        className="text-muted-foreground hover:text-primary px-0 text-sm"
+                        onClick={() => {
+                            toast.success("Telegram-аа шалгана уу");
+                        }}
+                    >
                         <Link href={config.telegramBot + "?start=help"} target="_blank" className="flex items-center">
                             Нэр, нууц үг харах
                             <EyeIcon className="w-4 h-4 ml-2" />

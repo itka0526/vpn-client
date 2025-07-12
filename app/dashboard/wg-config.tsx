@@ -10,6 +10,7 @@ import { useCopy } from "./copy";
 import { KeyRouteRespType } from "../api/keys/route";
 import toast from "react-hot-toast";
 import { ConfigItemProps } from "@/lib/types";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigItemProps) {
     const [open, setOpen] = useState(false);
@@ -54,23 +55,37 @@ export function WgConfig({ item: { secret: config, id }, setUserKeys }: ConfigIt
                     placeholder="Nothing..."
                 />
                 <div className="flex gap-4">
-                    <Button onClick={() => deleteKey()} disabled={deletingKey}>
-                        <Trash2 />
-                    </Button>
-                    <Button onClick={() => setOpen(true)}>
-                        <LucideQrCode />
-                    </Button>
-                    <Button onClick={() => copyToClipboard(config)} className="w-full">
-                        {copied ? (
-                            <>
-                                <Check className="mr-2 h-4 w-4" /> Хууллаа
-                            </>
-                        ) : (
-                            <>
-                                <Copy className="mr-2 h-4 w-4" /> Хуулах
-                            </>
-                        )}
-                    </Button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button onClick={() => deleteKey()} disabled={deletingKey}>
+                                    <Trash2 />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-sm text-gray-400">{deletingKey ? "Устгаж байна..." : "Түлхүүр устгах"}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button onClick={() => copyToClipboard(config)}>{copied ? <Check /> : <Copy />}</Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-sm text-gray-400">{copied ? "Хууллаа" : "Хуулах"} </p>
+                            </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button onClick={() => setOpen(true)} className="w-full">
+                                    <LucideQrCode className="mr-2" />
+                                    <span className="font-medium text-gray-100 ">QR код</span>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-sm text-gray-400">QR код уншуулах</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </CardContent>
         </>

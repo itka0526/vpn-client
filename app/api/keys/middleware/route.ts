@@ -1,13 +1,18 @@
+import { config } from "@/lib/config";
 import { NextRequest, NextResponse } from "next/server";
 
 function getRedirectLink({ userAgent = "", configLink = "" }) {
-    if (/iPhone|iPad|iPod/i.test(userAgent)) {
-        return `streisand://import/${configLink}/auto`;
-    }
-    if (/Android/i.test(userAgent)) {
+    if (config.hiddify) {
+        if (/iPhone|iPad|iPod/i.test(userAgent)) {
+            return `streisand://import/${configLink}/auto`;
+        }
+        if (/Android/i.test(userAgent)) {
+            return `hiddify://import/${configLink}`;
+        }
         return `hiddify://import/${configLink}`;
     }
-    return `hiddify://import/${configLink}`;
+
+    return `${configLink}`;
 }
 
 export async function GET(req: NextRequest) {
