@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { isTMA, retrieveRawInitData } from "@telegram-apps/sdk-react";
+import { isTMA, miniApp, retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -41,6 +41,10 @@ export default function AuthSection() {
                 }
             } catch (error) {
                 toast.error("Нэвтрэлт амжилтгүй!");
+
+                if (miniApp.close.isAvailable()) {
+                    miniApp.close();
+                }
             }
         };
 

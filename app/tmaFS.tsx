@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { bindViewportCssVars, init, mountViewport, viewport } from "@telegram-apps/sdk-react";
+import { bindViewportCssVars, init, mountViewport, swipeBehavior, viewport } from "@telegram-apps/sdk-react";
 
 export default function TMAFullscreen() {
     const mountedRef = useRef(false);
@@ -20,6 +20,14 @@ export default function TMAFullscreen() {
 
             if (viewport.requestFullscreen.isAvailable()) {
                 await viewport.requestFullscreen();
+            }
+
+            if (viewport.expand.isAvailable()) {
+                viewport.expand();
+            }
+
+            if (swipeBehavior.enableVertical.isAvailable()) {
+                swipeBehavior.disableVertical();
             }
         };
 
