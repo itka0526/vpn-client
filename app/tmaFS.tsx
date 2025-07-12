@@ -1,25 +1,30 @@
 "use client";
 
-import React, { PropsWithChildren, useEffect } from "react";
-import { viewport } from "@telegram-apps/sdk-react";
+import { useEffect, useRef } from "react";
+import { bindViewportCssVars, init, mountViewport, viewport } from "@telegram-apps/sdk-react";
 
-export default function FullscreenPage({ children }: PropsWithChildren) {
+export default function TMAFullscreen() {
+    const mountedRef = useRef(false);
+
     useEffect(() => {
-        const enableFullscreen = async () => {
+        if (mountedRef.current) return;
+        mountedRef.current = true;
+
+        const run = async () => {
+            init();
+
+            if (mountViewport.isAvailable()) {
+                await mountViewport();
+                bindViewportCssVars();
+            }
+
             if (viewport.requestFullscreen.isAvailable()) {
-                try {
-                    await viewport.requestFullscreen();
-                    console.log("Fullscreen requested");
-                } catch (err) {
-                    console.error("Failed to enter fullscreen:", err);
-                }
-            } else {
-                console.warn("Fullscreen API not available");
+                await viewport.requestFullscreen();
             }
         };
 
-        enableFullscreen();
+        run();
     }, []);
 
-    return <>{children}</>;
+    return null;
 }
