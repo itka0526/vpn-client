@@ -58,7 +58,7 @@ export function WgConfig({ item: { secret: config, id, keyPath }, setUserKeys }:
                   { method: "GET" }
               );
 
-              const jsonResp: KeyRouteRespType = await resp.json();
+              const jsonResp: { message: string; status: boolean } = await resp.json();
 
               if (jsonResp.status) toast.success(jsonResp.message);
               else toast.error(jsonResp.message);

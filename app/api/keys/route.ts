@@ -17,7 +17,7 @@ export type KeyRouteRespType = { message: string } & (
       }
     | {
           status: true;
-          data: Key | null;
+          data: Key;
       }
 );
 
@@ -287,7 +287,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<KeyRouteRes
     return NextResponse.json({ message: `"${vt}"` + " түлхүүр амжилттай устлаа.", status: true, data: key });
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse<KeyRouteRespType>> {
+export async function GET(req: NextRequest): Promise<NextResponse<{ status: boolean; message: string }>> {
     const { searchParams } = new URL(req.url);
     const mustSendToTelegram = searchParams.get("telegram");
 
@@ -328,7 +328,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<KeyRouteRespTy
                 throw new Error("Telegram хаяг руу явуулах боломжгүй байна");
             }
 
-            return NextResponse.json({ message: "Telegram-аа шалгаарай", status: true, data: null });
+            return NextResponse.json({ message: "Telegram-аа шалгаарай", status: true });
         } catch (error) {
             return NextResponse.json({ message: `${error}`, status: false });
         }
