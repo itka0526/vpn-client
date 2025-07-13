@@ -8,6 +8,8 @@ import prisma from "@/lib/db";
 import axios from "axios";
 import { createHiddifyKey, HIDDIFY_API_USER_BASE_URL, HiddifyKeyResponseType, removeHiddifyKeyDetails } from "../bot/hiddify";
 import { tgDomain } from "../bot/menu";
+import { bot } from "../bot/bot";
+import { InputFile } from "grammy";
 
 export type KeyRouteRespType = { message: string } & (
     | {
@@ -15,7 +17,7 @@ export type KeyRouteRespType = { message: string } & (
       }
     | {
           status: true;
-          data: Key;
+          data: Key | null;
       }
 );
 
@@ -283,4 +285,54 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<KeyRouteRes
         return NextResponse.json({ status: false, message: `Түлхүүрийг сангаас устгаж чадсангүй.` });
     }
     return NextResponse.json({ message: `"${vt}"` + " түлхүүр амжилттай устлаа.", status: true, data: key });
+}
+
+export async function GET(req: NextRequest): Promise<NextResponse<KeyRouteRespType>> {
+    const { searchParams } = new URL(req.url);
+    const mustSendToTelegram = searchParams.get("telegram");
+
+    if (mustSendToTelegram && config.wireguard) {
+        const rawKeyId = searchParams.get("keyId");
+
+        if (!rawKeyId) {
+            return NextResponse.json({ message: "Буруу өгөгдөл...", status: false });
+        }
+
+        try {
+            const dbRes = await prisma.key.findUnique({
+                where: { id: Number(rawKeyId) },
+                select: { user: { select: { email: true } }, secret: true, keyPath: true },
+            });
+
+            if (!dbRes) {
+                throw new Error("Түлхүүр олдсонгүй...");
+            }
+
+            const {
+                user: { email },
+                keyPath,
+                secret,
+            } = dbRes;
+
+            if (!email.endsWith(tgDomain)) {
+                throw new Error("Хэрэглэгч telegram-д бүртгэлгүй байна");
+            }
+
+            const telegramUserId = email.split("@")[0];
+            const fileName = keyPath.split("/").at(-1);
+            const config = Buffer.from(secret, "utf8");
+
+            try {
+                await bot.api.sendDocument(telegramUserId, new InputFile(Uint8Array.from(config), fileName));
+            } catch (_) {
+                throw new Error("Telegram хаяг руу явуулах боломжгүй байна");
+            }
+
+            return NextResponse.json({ message: "Telegram-аа шалгаарай", status: true, data: null });
+        } catch (error) {
+            return NextResponse.json({ message: `${error}`, status: false });
+        }
+    } else {
+        return NextResponse.json({ message: "Хөгжүүлээгүй...", status: false });
+    }
 }

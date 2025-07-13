@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { ConfigItemProps } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { isTMA } from "@telegram-apps/sdk-react";
+import axios from "axios";
 
 export function WgConfig({ item: { secret: config, id, keyPath }, setUserKeys }: ConfigItemProps) {
     const [open, setOpen] = useState(false);
@@ -48,8 +49,20 @@ export function WgConfig({ item: { secret: config, id, keyPath }, setUserKeys }:
     }, [config, fileName]);
 
     const downloadKey = isTMA()
-        ? () => {
-              toast.error("Уучлаарай! Та вебсайт руу орж татаарай!");
+        ? async () => {
+              const resp = await fetch(
+                  "/api/keys?" +
+                      new URLSearchParams({
+                          telegram: "true",
+                          keyId: `${id}`,
+                      }).toString(),
+                  { method: "GET" }
+              );
+
+              const jsonResp: KeyRouteRespType = await resp.json();
+
+              if (jsonResp.status) toast.success(jsonResp.message);
+              else toast.error(jsonResp.message);
           }
         : rawDownloadKey;
 

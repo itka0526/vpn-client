@@ -20,7 +20,7 @@ pmBot.on("callback_query:data", async (ctx) => {
             if (!email.endsWith(tgDomain)) {
                 return await ctx.api.sendMessage(config.adminTelegramId, "🔕 Хэрэглэгч телеграмд бүртгэлгүй...");
             }
-            const telegramUserId = Number(email.split("@"));
+            const telegramUserId = email.split("@")[0];
             return await ctx.api.sendMessage(telegramUserId, "🔔 Админ хариу өглөө...");
         };
 
@@ -73,7 +73,7 @@ pmBot.on("callback_query:data", async (ctx) => {
         }
     } catch (error) {
         console.error(error);
-        return await ctx.api.sendMessage(config.adminTelegramId, reportIssueText(config.adminTelegramId, `${error}`), { parse_mode: "HTML" });
+        return await ctx.api.sendMessage(config.adminTelegramId, reportIssueText("Хэрэглэгчээс", `${error}`), { parse_mode: "HTML" });
     } finally {
         await ctx.answerCallbackQuery();
     }
