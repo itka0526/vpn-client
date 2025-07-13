@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { ConfigItemProps } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { isTMA } from "@telegram-apps/sdk-react";
-import axios from "axios";
 
 export function WgConfig({ item: { secret: config, id, keyPath }, setUserKeys }: ConfigItemProps) {
     const [open, setOpen] = useState(false);
